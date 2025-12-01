@@ -1,0 +1,267 @@
+import 'dart:io';
+
+import 'package:date_format/date_format.dart';
+import 'package:irene_hours/loading/button_conversion.dart';
+import 'package:path_provider/path_provider.dart';
+
+import '../models/reg_act.dart';
+
+final _SuperStorage _companyStorage = _SuperStorage("Companies");
+final _SuperStorage _actionsStorage = _SuperStorage("Actions");
+final _SuperStorage _optionStorage = _SuperStorage("Options");
+const String store = 'Store:';
+//never gets emptied, except on restart
+Map<String, _SuperStorage> _filesInMemory = {};
+
+void setStoreLocation(String s) {
+  _optionStorage.addItem('$store$s');
+}
+
+Future<String> getStoreLocation() async {
+  return (await _optionStorage.readAllData())
+      .firstWhere((e) => e.startsWith(store))
+      .replaceFirst(store, '');
+}
+
+void deleteRegAction(RegAct cus) {
+  _getFileForRegActions(cus.day).delete(uniquePartAction(cus));
+}
+
+void addRegAction(RegAct cus) {
+  _getFileForRegActions(cus.day).addItem(actionExportGenerator(cus));
+}
+
+Future<List<RegAct>> getRegActions(DateTime start, DateTime end) async {
+  var days = start.difference(end).inDays;
+  List<RegAct> list = [];
+  List<Future> todos = [];
+  for (int i = 0; i <= days; i++) {
+    var date = start.add(Duration(days: i));
+    todos.add(
+      _getFileForRegActions(date).readAllData().then(
+        (itemList) => list.addAll(
+          itemList.map((item) => actionImportGenerator(item, date)),
+        ),
+      ),
+    );
+  }
+  //make sure all futures are completed
+  for (var todo in todos) {
+    await todo;
+  }
+  return list;
+}
+
+_SuperStorage _getFileForRegActions(DateTime day) {
+  String s = "Act${dateToString(day)}";
+  if (!_filesInMemory.containsKey(s)) {
+    _filesInMemory[s] = _SuperStorage(s);
+  }
+  return _filesInMemory[s]!;
+}
+
+String dateToString(DateTime day) {
+  return formatDate(day, [yy, '-', m, '-', d]);
+}
+
+void deleteAction(String cus) {
+  _actionsStorage.delete(idOnlyExportGenerator(cus));
+}
+
+void addAction(String cus) {
+  _actionsStorage.addItem(idOnlyExportGenerator(cus));
+}
+
+Future<List<String>> getAllActionsFromStorage() async {
+  return (await _actionsStorage.readAllData())
+      .map((e) => idOnlyImportGenerator(e))
+      .toList();
+}
+
+void deleteCompany(String cus) {
+  _companyStorage.delete(idOnlyExportGenerator(cus));
+}
+
+void addCompany(String cus) {
+  _companyStorage.addItem(idOnlyExportGenerator(cus));
+}
+
+Future<List<String>> getAllCompanies() async {
+  return (await _companyStorage.readAllData())
+      .map((e) => idOnlyImportGenerator(e))
+      .toList();
+}
+
+const defaultFolder = "Irene-Uren";
+
+Future<String> get localPath async {
+  final directory = await getApplicationDocumentsDirectory();
+  String myFolder =
+      '${directory.path}${Platform.pathSeparator}$defaultFolder${Platform.pathSeparator}';
+  if (!Directory(myFolder).existsSync()) {
+    Directory(myFolder).createSync();
+  }
+  return myFolder;
+}
+
+class _SuperStorage {
+  final String _fileName;
+  String _startLine = 'Byrd';
+  List<Future<dynamic> Function()> todo = [];
+
+  _SuperStorage(this._fileName);
+
+  Future<bool> exists() async {
+    return await (await _localFile).exists();
+  }
+
+  Future<File> get _localFile async {
+    final path = await localPath;
+    return File('$path$_fileName.byd');
+  }
+
+  Future<DateTime> _lastUpdate() async {
+    try {
+      final file = await _localFile;
+      if (!await file.exists()) {
+        return DateTime.now().subtract(const Duration(days: 300));
+      }
+      // Read the date
+      var dateText = (await file.readAsLines()).first;
+      return DateTime.parse(dateText.replaceFirst('Byrd', ''));
+    } catch (e) {
+      return DateTime.now().subtract(const Duration(days: 300));
+    }
+  }
+
+  Future<DateTime> lastUpdate() async {
+    return await _doAction(() => _lastUpdate());
+  }
+
+  Future<List<String>> readAllData() async {
+    return await _doAction(() => _readAllData());
+  }
+
+  Future<List<String>> _readAllData() async {
+    try {
+      final file = await _localFile;
+      if (!file.existsSync()) return [];
+      // Read the file
+      return (await file.readAsLines()).sublist(1);
+    } catch (e) {
+      // If we encounter an error, return 0
+      return [];
+    }
+  }
+
+  Future<void> _writeStrings(List<String> items) async {
+    _startLine =
+        'Byrd${formatDate(DateTime.now(), [yyyy, '-', mm, '-', dd, ' ', HH, ':', nn, ':', ss])}';
+    final file = await _localFile;
+    items.insert(0, _startLine);
+    await file.writeAsString(items.join('\n'));
+  }
+
+  Future<void> addItem(String string) async {
+    if (newLineCheck(string)) throw Exception('illegal character');
+    await _doAction(() => _addItem(string));
+  }
+
+  Future<void> _addItem(String string) async {
+    var values = await _readAllData();
+    values.add(string);
+    await _writeStrings(values);
+  }
+
+  Future<void> addItems(List<String> string) async {
+    if (string.any(newLineCheck)) throw Exception('illegal character');
+    await _doAction(() => _addItems(string));
+  }
+
+  Future<void> _addItems(List<String> string) async {
+    var values = await _readAllData();
+    values.addAll(string);
+    await _writeStrings(values);
+  }
+
+  Future<void> update(String newItem, String uniquePart) async {
+    if (newLineCheck(uniquePart) || newLineCheck(newItem)) {
+      throw Exception('illegal character');
+    }
+    await _doAction(() => _update(newItem, uniquePart));
+  }
+
+  Future _doAction(Future Function() method) async {
+    todo.add(method);
+    while (todo.first != method){
+      await waitTurn();
+    }
+    var result = await method();
+    todo.remove(method);
+
+    return result;
+  }
+
+  Future<void> _update(String newItem, String uniquePart) async {
+    var values = await _readAllData();
+    var index = values.indexWhere((e) => e.contains(uniquePart));
+    if (index != -1) {
+      values[index] = newItem;
+      await _writeStrings(values);
+    } else {
+      _addItem(newItem);
+    }
+  }
+
+  Future<void> updateAll(List<String> newItem, List<String> uniquePart) async {
+    if (uniquePart.any(newLineCheck) || newItem.any(newLineCheck)) {
+      throw Exception('illegal character');
+    }
+    await _doAction(() => _updateAll(newItem, uniquePart));
+  }
+
+  Future<void> _updateAll(List<String> newItem, List<String> uniquePart) async {
+    var values = await _readAllData();
+    for (int i = 0; i < newItem.length; i++) {
+      var index = values.indexWhere((e) => e.contains(uniquePart[i]));
+      values[index] = newItem[i];
+    }
+    await _writeStrings(values);
+  }
+
+  Future<void> delete(String uniquePart) async {
+    if (newLineCheck(uniquePart)) {
+      throw Exception('illegal character');
+    }
+    await _doAction(() => _delete(uniquePart));
+  }
+
+  Future<void> deleteAll(List<String> uniquePart) async {
+    if (uniquePart.any((s) => newLineCheck(s))) {
+      throw Exception('illegal character');
+    }
+    await _doAction(() => _deleteAll(uniquePart));
+  }
+
+  Future<void> _deleteAll(List<String> uniqueParts) async {
+    var values = await _readAllData();
+    for (var uniquePart in uniqueParts) {
+      values.removeAt(values.indexWhere((e) => e.contains(uniquePart)));
+    }
+    await _writeStrings(values);
+  }
+
+  Future<void> _delete(String uniquePart) async {
+    var values = await _readAllData();
+    values.removeAt(values.indexWhere((e) => e.contains(uniquePart)));
+    await _writeStrings(values);
+  }
+
+  Future<void> waitTurn() async {
+    await Future.delayed(const Duration(milliseconds: 213));
+  }
+
+  static final RegExp lineEnd = RegExp(r'[\r\n\f]');
+
+  static bool newLineCheck(String s) => (s.contains(lineEnd));
+}
