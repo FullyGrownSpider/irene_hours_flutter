@@ -32,8 +32,8 @@ class Loading {
     return await getAllActionsFromStorage();
   }
 
-  void storeRegAct(RegAct ra) {
-    addRegAction(ra);
+  Future<void> storeRegAct(RegAct ra) {
+    return addRegAction(ra);
   }
 
   void removeRegActFromStorage(RegAct ra) {
@@ -45,7 +45,7 @@ class Loading {
   }
 
   Future<String> readHTML() async {
-    final path = await localPath;
+    final path = await localPath();
 
     var file = File('$path$htmlFileName');
     if (!file.existsSync()) {
@@ -55,7 +55,7 @@ class Loading {
   }
 
   Future<void> createDefaultHTML() async {
-    final path = await localPath;
+    final path = await localPath();
 
     var file = File('$path$htmlFileName');
     file.writeAsStringSync(defaultHTML);
@@ -83,18 +83,18 @@ class Loading {
     var allActions = await getRegActions(start, end);
     fullPath += '${Platform.pathSeparator}Export';
     if (companyName != null) {
-      allActions.where((e) => e.companyName == companyName);
+      allActions.removeWhere((e) => e.companyName != companyName);
       fullPath += '-$companyName';
     }
     fullPath += formatDate(start, [yy, '-', mm, '-', dd]);
     if (!RegAct.sameDay(start, end)) {
       fullPath += '_${formatDate(start, [yy, '-', mm, '-', dd])}';
     }
-    exportToHTML(fullPath, allActions, showMyDialog);
+    exportToHTML('${fullPath.replaceAll(Platform.pathSeparator + Platform.pathSeparator, Platform.pathSeparator)}.html', allActions, showMyDialog);
   }
 
   Future<void> exportHTML() async {
-    final path = await localPath;
+    final path = await localPath();
 
     var file = File('$path$htmlFileName');
 

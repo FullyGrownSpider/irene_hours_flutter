@@ -30,7 +30,7 @@ class AddRemoveBox {
     } else {
       toShow = Text(getSelected());
     }
-    return SizedBox(height: 50, width: 300, child: Center(child: toShow));
+    return SizedBox(height: 50, width: 600, child: Center(child: toShow));
   }
   IconButton _createRemoveButton(void Function(String) removeCompany, String Function() getSelected, void Function(String) setSelected){
     return IconButton(onPressed: (){

@@ -2,7 +2,7 @@ Map<String, String> language = {};
 
 void dutch(){
   language['companies'] = 'Bedrijven';
-  language['actions'] = 'Wat heb je gedaan?';
+  language['actions'] = 'De actie';
   language['dayExport'] = 'Export alles';
   language['companyExport'] = 'Export bedrijf voor dagen';
   language['afterwards'] = 'Achteraf toevoegen';

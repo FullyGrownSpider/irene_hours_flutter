@@ -107,10 +107,12 @@ class _DayEditScreenState extends State<DayEditScreen> {
   }
 
   Future<Widget> createActions(BuildContext context) async {
-    regActs = (await widget.l.getAllRegActions(
+    var acts = (await widget.l.getAllRegActions(
       _curDate,
       _curDate,
-    )).map((e) => RegActDisplay(e)).toList();
+    ))..sort((a,b) => a.compareTo(b));
+
+    regActs = acts.map((e) => RegActDisplay(e)).toList();
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
