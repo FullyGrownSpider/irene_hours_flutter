@@ -86,14 +86,14 @@ dynamic dataImportGenerator<T>(String? sx) {
       return DateTime.now();
     } else {
       List x = s.split(storageListSep);
-      return DateTime(
+        return DateTime(
         DateTime
             .now()
             .year,
         1,
         1,
-        dataImportGenerator<int>(x[0]),
-        dataImportGenerator<int>(x[1]),
+        dataImportGenerator<int>(x[x.length -2]),
+        dataImportGenerator<int>(x[x.length -1]),
       );
     }
   }

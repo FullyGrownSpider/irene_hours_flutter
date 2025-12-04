@@ -11,14 +11,13 @@ Future<void> main() async {
 
   await windowManager.ensureInitialized();
 
-  Size s = Size (900, 600);
+  Size s = Size (600, 450);
   WindowOptions windowOptions = WindowOptions(
     size: s,
     center: true,
     title: 'Irene Uren',
     backgroundColor: Colors.grey,
-    maximumSize: s,
-    minimumSize: s,
+    minimumSize: s,//TODO
     skipTaskbar: false,
   );
   windowManager.waitUntilReadyToShow(windowOptions, () async {

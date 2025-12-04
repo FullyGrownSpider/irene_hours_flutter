@@ -9,17 +9,22 @@ import '../models/reg_act.dart';
 final _SuperStorage _companyStorage = _SuperStorage("Companies");
 final _SuperStorage _actionsStorage = _SuperStorage("Actions");
 final _SuperStorage _optionStorage = _SuperStorage("Options");
-const String store = 'Store:';
+const String store = 'Store○';
+
+const defaultFolder = "Irene-Uren";
+const String defaultDirectory = '/home/a804/Documents'; //for testing
 //never gets emptied, except on restart
 Map<String, _SuperStorage> _filesInMemory = {};
 
 void setStoreLocation(String s) {
-  _optionStorage.addItem('$store$s');
+  _optionStorage.update('$store$s', store);
 }
 
 Future<String> getStoreLocation() async {
-  return (await _optionStorage.readAllData())
-      .firstWhere((e) => e.startsWith(store))
+  var data = (await _optionStorage.readAllData());
+  if (data.isEmpty) return '';
+  return data
+      .firstWhere((e) => e.startsWith(store), orElse: () => '')
       .replaceFirst(store, '');
 }
 
@@ -27,12 +32,12 @@ void deleteRegAction(RegAct cus) {
   _getFileForRegActions(cus.day).delete(uniquePartAction(cus));
 }
 
-void addRegAction(RegAct cus) {
-  _getFileForRegActions(cus.day).addItem(actionExportGenerator(cus));
+Future<void> addRegAction(RegAct cus) {
+  return _getFileForRegActions(cus.day).addItem(actionExportGenerator(cus));
 }
 
 Future<List<RegAct>> getRegActions(DateTime start, DateTime end) async {
-  var days = start.difference(end).inDays;
+  var days = end.difference(start).inDays;
   List<RegAct> list = [];
   List<Future> todos = [];
   for (int i = 0; i <= days; i++) {
@@ -61,21 +66,19 @@ _SuperStorage _getFileForRegActions(DateTime day) {
 }
 
 String dateToString(DateTime day) {
-  return formatDate(day, [yy, '-', m, '-', d]);
+  return formatDate(day, [yy, '-', mm, '-', dd]);
 }
 
 void deleteAction(String cus) {
-  _actionsStorage.delete(idOnlyExportGenerator(cus));
+  _actionsStorage.delete(cus);
 }
 
 void addAction(String cus) {
-  _actionsStorage.addItem(idOnlyExportGenerator(cus));
+  _actionsStorage.addItem(cus);
 }
 
 Future<List<String>> getAllActionsFromStorage() async {
-  return (await _actionsStorage.readAllData())
-      .map((e) => idOnlyImportGenerator(e))
-      .toList();
+  return (await _actionsStorage.readAllData()).toList();
 }
 
 void deleteCompany(String cus) {
@@ -87,15 +90,19 @@ void addCompany(String cus) {
 }
 
 Future<List<String>> getAllCompanies() async {
-  return (await _companyStorage.readAllData())
-      .map((e) => idOnlyImportGenerator(e))
-      .toList();
+  var list = (await _companyStorage.readAllData());
+  if (list.isEmpty) return [];
+  return list.map((e) => idOnlyImportGenerator(e)).toList();
 }
 
-const defaultFolder = "Irene-Uren";
-
-Future<String> get localPath async {
-  final directory = await getApplicationDocumentsDirectory();
+Future<String> localPath() async {
+  Directory directory;
+  try {
+    directory = await getApplicationDocumentsDirectory();
+  } catch (_) {
+    directory = Directory(defaultDirectory);
+  }
+  //should only be null if error
   String myFolder =
       '${directory.path}${Platform.pathSeparator}$defaultFolder${Platform.pathSeparator}';
   if (!Directory(myFolder).existsSync()) {
@@ -105,25 +112,28 @@ Future<String> get localPath async {
 }
 
 class _SuperStorage {
-  final String _fileName;
+  File? _file;
   String _startLine = 'Byrd';
   List<Future<dynamic> Function()> todo = [];
 
-  _SuperStorage(this._fileName);
-
-  Future<bool> exists() async {
-    return await (await _localFile).exists();
+  _SuperStorage(String fileName) {
+    _doAction(() => localPath().then((path) => _file = File('$path$fileName.byd')));
   }
 
-  Future<File> get _localFile async {
-    final path = await localPath;
-    return File('$path$_fileName.byd');
+  Future<File?> get _localFile async {
+    if (_file == null) return null;
+    if (_file!.existsSync()) {
+      return _file;
+    }
+    //create the directory
+    _file!.createSync(recursive: true);
+    return null;
   }
 
   Future<DateTime> _lastUpdate() async {
     try {
       final file = await _localFile;
-      if (!await file.exists()) {
+      if (file == null) {
         return DateTime.now().subtract(const Duration(days: 300));
       }
       // Read the date
@@ -145,7 +155,7 @@ class _SuperStorage {
   Future<List<String>> _readAllData() async {
     try {
       final file = await _localFile;
-      if (!file.existsSync()) return [];
+      if (file == null) return [];
       // Read the file
       return (await file.readAsLines()).sublist(1);
     } catch (e) {
@@ -157,7 +167,12 @@ class _SuperStorage {
   Future<void> _writeStrings(List<String> items) async {
     _startLine =
         'Byrd${formatDate(DateTime.now(), [yyyy, '-', mm, '-', dd, ' ', HH, ':', nn, ':', ss])}';
-    final file = await _localFile;
+    var file = await _localFile;
+    if (file == null) {
+      file = await _localFile;
+      //if null we cant create it for some reason
+      if (file == null) return;
+    }
     items.insert(0, _startLine);
     await file.writeAsString(items.join('\n'));
   }
@@ -193,7 +208,7 @@ class _SuperStorage {
 
   Future _doAction(Future Function() method) async {
     todo.add(method);
-    while (todo.first != method){
+    while (todo.first != method) {
       await waitTurn();
     }
     var result = await method();
@@ -246,14 +261,18 @@ class _SuperStorage {
   Future<void> _deleteAll(List<String> uniqueParts) async {
     var values = await _readAllData();
     for (var uniquePart in uniqueParts) {
-      values.removeAt(values.indexWhere((e) => e.contains(uniquePart)));
+      var index = values.indexWhere((e) => e.contains(uniquePart));
+      if (index >= 0) {
+        values.removeAt(index);
+      }
     }
     await _writeStrings(values);
   }
 
   Future<void> _delete(String uniquePart) async {
     var values = await _readAllData();
-    values.removeAt(values.indexWhere((e) => e.contains(uniquePart)));
+    if (values.isEmpty) return;
+    values.removeWhere((e) => e.contains(uniquePart));
     await _writeStrings(values);
   }
 

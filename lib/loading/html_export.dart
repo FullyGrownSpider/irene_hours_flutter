@@ -67,7 +67,7 @@ Future<String> _createFile(List<RegAct> actions, String minutesStringTot) async 
 
     if (prevCompany != action.companyName) {
       var index = actions
-          .sublist(i, actions.length - 1)
+          .sublist(i, actions.length)
           .indexWhere((e) => e.companyName != action.companyName);
       if (index == -1) index = actions.length - i;
       if (index == 1) {
@@ -79,8 +79,8 @@ Future<String> _createFile(List<RegAct> actions, String minutesStringTot) async 
     }
     if (!RegAct.sameDay(prevDay, action.day)) {
       var index = actions
-          .sublist(i, actions.length - 1)
-          .indexWhere((e) => RegAct.sameDay(e.day, action.day));
+          .sublist(i, actions.length)
+          .indexWhere((e) => !RegAct.sameDay(e.day, action.day));
       if (index == -1) index = actions.length - i;
       var writtenDate = formatDate(action.day, [dd, '-', MM, '-', yyyy]);
       if (index == 1) {
@@ -92,7 +92,7 @@ Future<String> _createFile(List<RegAct> actions, String minutesStringTot) async 
     }
     if (prevAction != action.actionName) {
       var index = actions
-          .sublist(i, actions.length - 1)
+          .sublist(i, actions.length)
           .indexWhere((e) => e.actionName != action.actionName);
       if (index == -1) index = actions.length - i;
       if (index == 1) {

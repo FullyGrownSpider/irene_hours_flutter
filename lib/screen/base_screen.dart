@@ -39,7 +39,7 @@ class _BaseScreenState extends State<BaseScreen> {
     },
     () {
       _showMyDialog(language['forgotSelect']!);
-    }
+    },
   );
 
   String selectedCompany = '';
@@ -49,11 +49,10 @@ class _BaseScreenState extends State<BaseScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+      body: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: SingleChildScrollView(
+          child: Column(
             children: [
               FutureBuilder(
                 future: widget.l.getAllCompanyNames(),
@@ -74,46 +73,7 @@ class _BaseScreenState extends State<BaseScreen> {
                 },
               ),
               startButton.getMyWidget(),
-            ],
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              arthurButton(
-                onPressed: () {
-                  widget.l.createExport(
-                    daysStart.getDate(),
-                    daysEnd.getDate(),
-                    null,
-                    _showMyDialog,
-                  );
-                },
-                child: arthurText(language['dayExport']!),
-              ),
-              arthurButton(
-                onPressed: () {
-                  if (companyBox!.getSelected().isEmpty) {
-                    _showMyDialog(language['forgotSelect']!);
-                    return;
-                  }
-                  widget.l.createExport(
-                    daysStart.getDate(),
-                    daysEnd.getDate(),
-                    companyBox!.getSelected(),
-                    _showMyDialog,
-                  );
-                },
-                child: arthurText(language['companyExport']!),
-              ),
-              arthurText('   '),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  daysStart.getMyWidget(context),
-                  arthurText('  ⎻⎻⎻⎻⎻  '),
-                  daysEnd.getMyWidget(context),
-                ],
-              ),
+              arthurText(' '),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -147,6 +107,46 @@ class _BaseScreenState extends State<BaseScreen> {
                   ),
                 ],
               ),
+              arthurText(' '),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  daysStart.getMyWidget(context),
+                  arthurText('  ⎻⎻⎻⎻⎻  '),
+                  daysEnd.getMyWidget(context),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  arthurButton(
+                    onPressed: () {
+                      widget.l.createExport(
+                        daysStart.getDate(),
+                        daysEnd.getDate(),
+                        null,
+                        _showMyDialog,
+                      );
+                    },
+                    child: arthurText(language['dayExport']!),
+                  ),
+                  arthurButton(
+                    onPressed: () {
+                      if (companyBox!.getSelected().isEmpty) {
+                        _showMyDialog(language['forgotSelect']!);
+                        return;
+                      }
+                      widget.l.createExport(
+                        daysStart.getDate(),
+                        daysEnd.getDate(),
+                        companyBox!.getSelected(),
+                        _showMyDialog,
+                      );
+                    },
+                    child: arthurText(language['companyExport']!),
+                  ),
+                ],
+              ),
               arthurText('   '),
               arthurButton(
                 onPressed: () {
@@ -154,15 +154,25 @@ class _BaseScreenState extends State<BaseScreen> {
                 },
                 child: arthurText(language['defaultHTML']!),
               ),
-              arthurButton(
-                onPressed: () {
-                  setStorageLocation(context);
-                },
-                child: arthurText(language['exportLocation']!),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  arthurButton(
+                    onPressed: () {
+                      setStorageLocation(context);
+                    },
+                    child: arthurText(language['exportLocation']!),
+                  ),
+                  FutureBuilder(
+                    future: widget.l.getPath(),
+                    builder: (newContext, text) =>
+                        arthurText(text.hasData ? shorten(text.data!, 40) : ''),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -246,5 +256,11 @@ class _BaseScreenState extends State<BaseScreen> {
       if (e == null) return;
       widget.l.setPath(e);
     });
+  }
+
+  String shorten(String s, int i) {
+    if (s.length <= i) return s;
+    int half = (i / 2).toInt();
+    return '${s.substring(0, half - 3)}... ...${s.substring(s.length - half + 3, s.length)}';
   }
 }
