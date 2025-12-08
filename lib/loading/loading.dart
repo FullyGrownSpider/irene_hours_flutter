@@ -8,8 +8,8 @@ import 'package:irene_hours/models/reg_act.dart';
 class Loading {
   static const String htmlFileName = 'usedHTML.html';
 
-  void storeCompany(String companyName) {
-    addCompany(companyName);
+  Future<void> storeCompany(String companyName) {
+    return addCompany(companyName);
   }
 
   void removeCompanyFromStorgage(String companyName) {
@@ -65,20 +65,19 @@ class Loading {
     return getStoreLocation();
   }
 
-  void setPath(String s) {
-    setStoreLocation(s);
+  Future<void> setPath(String s) {
+    return setStoreLocation(s);
   }
 
-  void createExport(
+  Future<void> createExport(
     DateTime start,
     DateTime end,
     String? companyName,
     Future<void> Function(String s) showMyDialog,
   ) async {
-    var fullPath = await getPath();
+    var fullPath = await getStoreLocation();
     if (fullPath.isEmpty) {
-      exportToHTML('', [], showMyDialog);
-      return;
+      return exportToHTML('', [], showMyDialog);
     }
     var allActions = await getRegActions(start, end);
     fullPath += '${Platform.pathSeparator}Export';
@@ -90,7 +89,11 @@ class Loading {
     if (!RegAct.sameDay(start, end)) {
       fullPath += '_${formatDate(start, [yy, '-', mm, '-', dd])}';
     }
-    exportToHTML('${fullPath.replaceAll(Platform.pathSeparator + Platform.pathSeparator, Platform.pathSeparator)}.html', allActions, showMyDialog);
+    return exportToHTML(
+      '${fullPath.replaceAll(Platform.pathSeparator + Platform.pathSeparator, Platform.pathSeparator)}.html',
+      allActions,
+      showMyDialog,
+    );
   }
 
   Future<void> exportHTML() async {

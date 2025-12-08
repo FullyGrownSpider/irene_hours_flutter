@@ -47,11 +47,14 @@ Future<void> exportToHTML(
   var data = await _createFile(actions, minutesString);
 
   // Save the document...
-  File(fullPath).writeAsString(data);
+  await File(fullPath).writeAsString(data);
 }
 
 //actions cant have 0 items or there will be an error
-Future<String> _createFile(List<RegAct> actions, String minutesStringTot) async {
+Future<String> _createFile(
+  List<RegAct> actions,
+  String minutesStringTot,
+) async {
   String newFile = await Loading().readHTML();
   newFile = newFile.replaceAll(_workTimeReplace, minutesStringTot);
   newFile = newFile.replaceAll(_tableNameReplace, _tableTop);

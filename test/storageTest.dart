@@ -14,25 +14,26 @@ import 'package:irene_hours/loading/loading_storage.dart';
 import 'package:irene_hours/models/reg_act.dart';
 
 void main() {
-  clear();
-
   test('regact convert back and forth', _conversionTest);
   test('export Location', _getAndSetExport);
   test('export actions', _storeActions);
   test('export companies', _storeCompanies);
   test('export regAct', _storeRegAct1Day);
   test('export regAct', _storeRegAct2Day);
-
 }
 
-void clear() {
-  var directory = Directory(defaultDirectory + Platform.pathSeparator + defaultFolder);
+void _clear() {
+  var directory = Directory(
+    defaultDirectory + Platform.pathSeparator + defaultFolder,
+  );
   if (directory.existsSync()) {
     directory.deleteSync(recursive: true);
   }
 }
 
 Future<void> _storeActions() async {
+  isTest = true;
+  _clear();
   var loading = Loading();
   loading.removeActionFromStorage('s');
   var data = await loading.getAllCompanyNames();
@@ -48,6 +49,8 @@ Future<void> _storeActions() async {
 }
 
 Future<void> _storeCompanies() async {
+  isTest = true;
+  _clear();
   var loading = Loading();
   var data = await loading.getAllCompanyNames();
   expect([], data);
@@ -63,6 +66,8 @@ Future<void> _storeCompanies() async {
 }
 
 Future<void> _storeRegAct1Day() async {
+  isTest = true;
+  _clear();
   var loading = Loading();
   var data = await loading.getAllRegActions(DateTime.now(), DateTime.now());
   expect([], data);
@@ -78,35 +83,40 @@ Future<void> _storeRegAct1Day() async {
 }
 
 Future<void> _storeRegAct2Day() async {
-  clear();
+  isTest = true;
+  _clear();
   var loading = Loading();
 
   var list = _conversionList();
   var newDay = DateTime.now().add(Duration(days: -1));
   for (var e in list) {
-    loading.storeRegAct(RegAct(e.startTime, e.companyName, e.actionName, e.endTime, newDay));
+    loading.storeRegAct(
+      RegAct(e.startTime, e.companyName, e.actionName, e.endTime, newDay),
+    );
     loading.storeRegAct(e);
   }
-  var data = await loading.getAllRegActions(DateTime.now().add(Duration(days: -1)), DateTime.now());
+  var data = await loading.getAllRegActions(
+    DateTime.now().add(Duration(days: -1)),
+    DateTime.now(),
+  );
   loading.removeRegActFromStorage(_uniqueRegAct());
-  expect(data.length, list.length*2);
+  expect(data.length, list.length * 2);
 }
 
-
 Future<void> _getAndSetExport() async {
+  isTest = true;
+  _clear();
   var loading = Loading();
-  clear();
   expect('', await loading.getPath());
-  clear();
+  _clear();
 
   loading.setPath('');
   expect('', await loading.getPath());
 
-  final path = '$defaultDirectory${Platform.pathSeparator}$defaultFolder${Platform.pathSeparator}';
-  loading.setPath(
-    path,
-  ); //testing on different pc? edit this location
-  expect(path , await loading.getPath());
+  final path =
+      '$defaultDirectory${Platform.pathSeparator}$defaultFolder${Platform.pathSeparator}';
+  loading.setPath(path); //testing on different pc? edit this location
+  expect(path, await loading.getPath());
 }
 
 void _conversionTest() {
@@ -133,14 +143,14 @@ List<RegAct> _conversionList() {
 }
 
 RegAct _uniqueRegAct() => RegAct(
-    DateTime.now().add(Duration(minutes: (-20))),
-    'companyName:-1',
-    ' actionName',
-    DateTime.now().add(Duration(minutes: -10)),
-    DateTime.now());
+  DateTime.now().add(Duration(minutes: (-20))),
+  'companyName:-1',
+  ' actionName',
+  DateTime.now().add(Duration(minutes: -10)),
+  DateTime.now(),
+);
 
-
-    List<String> _randomStrings() {
+List<String> _randomStrings() {
   return List<String>.generate(
     10,
     (int index) => 'wow random nr:$index',

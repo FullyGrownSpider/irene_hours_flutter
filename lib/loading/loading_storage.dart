@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../models/reg_act.dart';
 
+bool isTest = false;
 final _SuperStorage _companyStorage = _SuperStorage("Companies");
 final _SuperStorage _actionsStorage = _SuperStorage("Actions");
 final _SuperStorage _optionStorage = _SuperStorage("Options");
@@ -16,20 +17,20 @@ const String defaultDirectory = '/home/a804/Documents'; //for testing
 //never gets emptied, except on restart
 Map<String, _SuperStorage> _filesInMemory = {};
 
-void setStoreLocation(String s) {
-  _optionStorage.update('$store$s', store);
+Future<void> setStoreLocation(String s) {
+  return _optionStorage.update('$store$s', store);
 }
 
 Future<String> getStoreLocation() async {
-  var data = (await _optionStorage.readAllData());
+  var data = await _optionStorage.readAllData();
   if (data.isEmpty) return '';
   return data
       .firstWhere((e) => e.startsWith(store), orElse: () => '')
       .replaceFirst(store, '');
 }
 
-void deleteRegAction(RegAct cus) {
-  _getFileForRegActions(cus.day).delete(uniquePartAction(cus));
+Future<void> deleteRegAction(RegAct cus) {
+  return _getFileForRegActions(cus.day).delete(uniquePartAction(cus));
 }
 
 Future<void> addRegAction(RegAct cus) {
@@ -69,24 +70,24 @@ String dateToString(DateTime day) {
   return formatDate(day, [yy, '-', mm, '-', dd]);
 }
 
-void deleteAction(String cus) {
-  _actionsStorage.delete(cus);
+Future<void> deleteAction(String cus) {
+  return _actionsStorage.delete(cus);
 }
 
-void addAction(String cus) {
-  _actionsStorage.addItem(cus);
+Future<void> addAction(String cus) {
+  return _actionsStorage.addItem(cus);
 }
 
 Future<List<String>> getAllActionsFromStorage() async {
   return (await _actionsStorage.readAllData()).toList();
 }
 
-void deleteCompany(String cus) {
-  _companyStorage.delete(idOnlyExportGenerator(cus));
+Future<void> deleteCompany(String cus) {
+  return _companyStorage.delete(idOnlyExportGenerator(cus));
 }
 
-void addCompany(String cus) {
-  _companyStorage.addItem(idOnlyExportGenerator(cus));
+Future<void> addCompany(String cus) {
+  return _companyStorage.addItem(idOnlyExportGenerator(cus));
 }
 
 Future<List<String>> getAllCompanies() async {
@@ -97,9 +98,9 @@ Future<List<String>> getAllCompanies() async {
 
 Future<String> localPath() async {
   Directory directory;
-  try {
+  if (!isTest) {
     directory = await getApplicationDocumentsDirectory();
-  } catch (_) {
+  } else {
     directory = Directory(defaultDirectory);
   }
   //should only be null if error
@@ -117,7 +118,9 @@ class _SuperStorage {
   List<Future<dynamic> Function()> todo = [];
 
   _SuperStorage(String fileName) {
-    _doAction(() => localPath().then((path) => _file = File('$path$fileName.byd')));
+    _doAction(
+      () => localPath().then((path) => _file = File('$path$fileName.byd')),
+    );
   }
 
   Future<File?> get _localFile async {
@@ -185,7 +188,7 @@ class _SuperStorage {
   Future<void> _addItem(String string) async {
     var values = await _readAllData();
     values.add(string);
-    await _writeStrings(values);
+    return _writeStrings(values);
   }
 
   Future<void> addItems(List<String> string) async {
@@ -222,10 +225,10 @@ class _SuperStorage {
     var index = values.indexWhere((e) => e.contains(uniquePart));
     if (index != -1) {
       values[index] = newItem;
-      await _writeStrings(values);
     } else {
-      _addItem(newItem);
+      values.add(newItem);
     }
+    return _writeStrings(values);
   }
 
   Future<void> updateAll(List<String> newItem, List<String> uniquePart) async {
