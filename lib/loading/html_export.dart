@@ -9,14 +9,15 @@ import 'loading.dart';
 //TODO other lang
 final String _workTimeReplace = "WERKTIJD";
 final String _tableReplaceReplace = "TABLEDATA";
-final String _tableNameReplace = "NAMESANDSUCH";
 final String _tableTop = """
-            <th>Bedrijf</th>
-            <th>Dag</th>
-            <th>Soort activiteit</th>
-            <th>Start tijd</th>
-            <th>Eind tijd</th>
-            <th>Totale Tijd</th>""";
+            <tr>
+            <td>Bedrijf</td>
+            <td>Soort activiteit</td>
+            <td>Start tijd</td>
+            <td>Eind tijd</td>
+            <td>Totale Tijd</td>
+            </tr>
+            """;
 
 Future<void> exportToHTML(
   String fullPath,
@@ -50,90 +51,164 @@ Future<void> exportToHTML(
   File(fullPath).writeAsString(data);
 }
 
+// Future<void> main() async {
+//   var t= _createFile(createList(3), "1:40");
+//   var tx= _createFile(createList(1), "1:40");
+//   var x = 1;
+//
+// }
+// List<RegAct> createList(int comp){
+//  List<RegAct> list = [];
+//  var r = Random(7);
+//  for (int i = 0; i < 30; i++) {
+//    var time = DateTime.now();
+//    time = time.add(Duration(hours: i));
+//    list.add(RegAct(time, "Bedrijf${r.nextInt(comp)}", "actie${i/2}", time.add(Duration(minutes: 10)),time.add(Duration(days: (i/3).toInt()))));
+//  }
+//  return list;
+// }
+
 //actions cant have 0 items or there will be an error
 Future<String> _createFile(List<RegAct> actions, String minutesStringTot) async {
   String newFile = await Loading().readHTML();
   newFile = newFile.replaceAll(_workTimeReplace, minutesStringTot);
-  newFile = newFile.replaceAll(_tableNameReplace, _tableTop);
 
   StringBuffer tableBuf = StringBuffer();
-  String prevCompany = '';
-  DateTime prevDay = DateTime.fromMicrosecondsSinceEpoch(0);
-  String prevAction = '';
+  List<String> currentRow = [];
+  List<String> rowsNoDate = [];
+  String prevCompany = actions.first.companyName;
+  int sameCompany = 0;
+  var companyTime = <String,int>{};
+  int totalForThisDay = 0;
+  DateTime prevDay = actions.first.day;
+  for (var action in actions) {
+    if (action.day != prevDay) {
+      int index = rowsNoDate.length-sameCompany;
+      rowsNoDate[index] += createLayerdItem(prevCompany, sameCompany);
+      sameCompany = 0;
 
-  for (int i = 0; i < actions.length; i++) {
-    var action = actions[i];
-    tableBuf.write(_rowStart());
-
-    if (prevCompany != action.companyName) {
-      var index = actions
-          .sublist(i, actions.length)
-          .indexWhere((e) => e.companyName != action.companyName);
-      if (index == -1) index = actions.length - i;
-      if (index == 1) {
-        tableBuf.write(_createRowItem(action.companyName));
-      } else {
-        tableBuf.write(_createLayerdItem(action.companyName, index));
-      }
-      prevCompany = action.companyName;
-    }
-    if (!RegAct.sameDay(prevDay, action.day)) {
-      var index = actions
-          .sublist(i, actions.length)
-          .indexWhere((e) => !RegAct.sameDay(e.day, action.day));
-      if (index == -1) index = actions.length - i;
-      var writtenDate = formatDate(action.day, [dd, '-', MM, '-', yyyy]);
-      if (index == 1) {
-        tableBuf.write(_createRowItem(writtenDate));
-      } else {
-        tableBuf.write(_createLayerdItem(writtenDate, index));
-      }
+      var timePrint = totalForThisDay;
+      currentRow.add(createRowsWithSingleDate(prevDay, rowsNoDate, timePrint, companyTime));
       prevDay = action.day;
+      prevCompany = action.companyName;
+      totalForThisDay = 0;
+      rowsNoDate.clear();
+      companyTime.clear();
     }
-    if (prevAction != action.actionName) {
-      var index = actions
-          .sublist(i, actions.length)
-          .indexWhere((e) => e.actionName != action.actionName);
-      if (index == -1) index = actions.length - i;
-      if (index == 1) {
-        tableBuf.write(_createRowItem(action.actionName));
+    totalForThisDay += action.getTime();
+    String exportValue = createRowData(action);
+    rowsNoDate.add(exportValue);
+
+    if (prevCompany == action.companyName){
+      sameCompany++;
+      if (companyTime[action.companyName] == null) {
+        companyTime[action.companyName] = action.getTime();
       } else {
-        tableBuf.write(_createLayerdItem(action.actionName, index));
+        companyTime[action.companyName] = companyTime[action.companyName]! + action.getTime();
       }
-      prevAction = action.actionName;
+      //Store the action
+    } else {
+      companyTime[action.companyName] = action.getTime();
+      int index = rowsNoDate.length-sameCompany - 1;
+      rowsNoDate[index] += createLayerdItem(prevCompany, sameCompany);
+      prevCompany = action.companyName;
+      sameCompany = 1;
     }
 
-    tableBuf.write(
-      _createRowItem(formatDate(action.startTime, [HH, ' : ', nn])),
-    );
-    tableBuf.write(_createRowItem(formatDate(action.endTime, [HH, ' : ', nn])));
-
-    var minsTot = action.getTime();
-    var minutesString =
-        '${(minsTot / 60).toInt().toString().padLeft(2, '0')} : ${(minsTot % 60).toString().padLeft(2, '0')}';
-
-    tableBuf.write(_createRowItem(minutesString));
-
-    tableBuf.write(_rowEnd());
   }
-  return newFile.replaceAll(_tableReplaceReplace, tableBuf.toString());
+  //add the final company
+  int index = rowsNoDate.length-sameCompany;
+  rowsNoDate[index] += createLayerdItem(prevCompany, sameCompany);
+  //add final day
+  currentRow.add(createRowsWithSingleDate(prevDay, rowsNoDate, totalForThisDay, companyTime));
+  for (var row in currentRow) {
+    tableBuf.write(row);
+  }
+
+  newFile = newFile.replaceFirst(_tableReplaceReplace, tableBuf.toString());
+  return newFile;
 }
 
-String _rowStart() {
-  return "<tr>\n";
+String biggerColumn(String data, int columns, String align) {
+  return '<td style="padding: 0.2rem; font-weight: bold; text-align:$align" colspan="$columns">$data</td>\n';
 }
 
-String _rowEnd() {
+String createDateTop(String date, String time){
+  return rowStart() + biggerColumn("Dag: $date",3,"center")+biggerColumn("Totaal: $time",2,"right")+ rowEnd();
+}
+
+String createLayerdItem(String data, int amount) {
+  return '<td rowspan="$amount">$data</td>\n';
+}
+
+String createDateBottom(Map<String, int> compTime){
+  var buf = StringBuffer();
+
+  var sortedByKeyMap = Map.fromEntries(
+      compTime.entries.toList()..sort((e1, e2) => e1.key.compareTo(e2.key))).entries;
+  for (var cT in sortedByKeyMap){
+  buf.write(rowStart());
+  buf.write(biggerColumn("Voor ${cT.key}", 3, "center"));
+  buf.write(biggerColumn("${createTimeText(cT.value)} uur", 2, "right"));
+  buf.write(rowEnd());
+  }
+  return buf.toString();
+}
+
+String createTimeText(int time) {
+  return "${("${time / 60}").padLeft(2, '0')}:${("${time % 60}").padLeft(2,'0')}";
+}
+
+String createDateTimeTimeText(DateTime time) {
+  return formatDate(time, [HH, ':', MM]);
+}
+String createDateText(DateTime time) {
+  return formatDate(time, [d, '-', m, '-', yyyy]);
+}
+
+String createRowsWithSingleDate(DateTime day, List<String> otherData, int time, Map<String, int> companyTime) {
+  StringBuffer buf = StringBuffer();
+  buf.write(rowStart());
+  buf.write(biggerColumnNoLines(".",5,"right"));
+  buf.write(rowEnd());
+  buf.write(createDateTop(createDateText(day),createTimeText(time)));
+  buf.write(createDateBottom(companyTime));
+  buf.write(_tableTop);
+  for (var item in otherData){
+    buf.write(item);
+    buf.write(rowEnd());
+  }
+  return buf.toString();
+}
+
+String createRowData(RegAct action) {
+  int mins = action.getTime();
+  var minsTot = createTimeText(mins);
+  return (createRowItem(action.actionName) +
+      createRowItemForTime(createDateTimeTimeText(action.startTime)) +
+      createRowItemForTime(createDateTimeTimeText(action.endTime)) +
+      createRowItemForTime(minsTot));
+}
+
+String createRowItem(String data) {
+  return '<td>$data</td>\n';
+}
+
+String createRowItemForTime(String data) {
+  return '<td style="text-align:right;">$data</td>\n';
+}
+
+String biggerColumnNoLines(String data, int columns, String align) {
+  return '<td style="border: 0px solid black; padding: 0.2rem; font-weight: bold; font-size:larger; text-align:$align" colspan="$columns">$data</td>\n';
+}
+String rowEnd() {
   return "</tr>\n";
 }
 
-String _createRowItem(String data) {
-  return '<td style="text-align:center;">  $data</td>\n';
+String rowStart() {
+  return "<tr>\n";
 }
 
-String _createLayerdItem(String data, int amount) {
-  return '<td style="text-align:center;" rowspan="$amount">  $data</td>\n';
-}
 
 String defaultHTML = '''
 <!DOCTYPE html>
@@ -175,16 +250,12 @@ font-size: larger
 </table>
 <table class="tableData" style="width: 100%">
 <colgroup>
-<col span="1" style="width:15%;">
-<col span="1" style="width:15%;">
+<col span="1" style="width:20%;">
 <col span="1"">
 <col span="1" style="width:10%;">
 <col span="1" style="width:10%;">
 <col span="1" style="width:10%;">
 </colgroup>
-<tr>
-NAMESANDSUCH
-</tr>
 TABLEDATA
 </table>
 </body>
