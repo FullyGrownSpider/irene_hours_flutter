@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
@@ -18,11 +19,33 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   clear();
   test('create html', _createEmptyHtml);
+
+  //vibes based test
+  myTest();
   // test('export actions', _storeActions);
   // test('export companies', _storeCompanies);
   // test('export regAct', _storeRegAct1Day);
   // test('export regAct', _storeRegAct2Day);
 }
+
+Future<void> myTest() async {
+  var t= await createFile(createList(3));
+
+  var tx= await createFile(createList(1));
+  var x = 1;
+
+}
+List<RegAct> createList(int comp){
+  List<RegAct> list = [];
+  var r = Random(7);
+  for (int i = 0; i < 30; i++) {
+    var time = DateTime.now();
+    time = time.add(Duration(hours: i));
+    list.add(RegAct(time, "Bedrijf${r.nextInt(comp)}", "actie${(i/2).toInt()}", time.add(Duration(minutes: 10)),time.add(Duration(days: (i/3).toInt()))));
+  }
+  return list;
+}
+
 
 void clear() {
   var directory = Directory(
