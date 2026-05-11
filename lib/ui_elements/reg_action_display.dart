@@ -4,6 +4,8 @@ import 'package:irene_hours/ui_elements/arthur_text.dart';
 import 'package:irene_hours/ui_elements/text_input_popup.dart';
 import 'package:irene_hours/ui_elements/time-picker.dart';
 
+import '../translations.dart';
+
 class RegActDisplay {
   final TimePicker _timeStart = TimePicker();
   late final ValueNotifier<String> _companyName = ValueNotifier(
@@ -27,14 +29,14 @@ class RegActDisplay {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           arthurButton(
-            onPressed: () => textPressed(context, _companyName),
+            onPressed: () => textPressed(context, _companyName, language[Words.companyInput]!),
             child: ValueListenableBuilder(
               valueListenable: _companyName,
               builder: (newContext, newValue, widget) => arthurText(toDelete ? '❌$newValue' : newValue),
             ),
           ),
           arthurButton(
-            onPressed: () => textPressed(context, _action),
+            onPressed: () => textPressed(context, _action, language[Words.actionInput]!),
             child: ValueListenableBuilder(
               valueListenable: _action,
               builder: (newContext, newValue, widget) => arthurText(toDelete ? '❌$newValue' : newValue),
@@ -47,8 +49,8 @@ class RegActDisplay {
     );
   }
 
-  void textPressed(BuildContext context, ValueNotifier correct) {
-    displayTextInputDialog(context, correct.value).then((e) {
+  void textPressed(BuildContext context, ValueNotifier correct, String text) {
+    displayTextInputDialog(context, correct.value, text).then((e) {
       if (e == null) return;
       correct.value = e;
     });

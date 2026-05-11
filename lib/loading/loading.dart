@@ -69,6 +69,19 @@ class Loading {
     setStoreLocation(s);
   }
 
+  Future<String> getLang() {
+    return getPrefLang();
+  }
+
+  String getLangSync() {
+    return getPrefLangSync();
+  }
+
+  void setLang(String s) {
+    setPrefLang(s);
+  }
+
+
   void createExport(
     DateTime start,
     DateTime end,

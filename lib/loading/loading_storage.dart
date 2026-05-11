@@ -10,6 +10,7 @@ final _SuperStorage _companyStorage = _SuperStorage("Companies");
 final _SuperStorage _actionsStorage = _SuperStorage("Actions");
 final _SuperStorage _optionStorage = _SuperStorage("Options");
 const String store = 'Store○';
+const String lang = 'Lang○';
 
 const defaultFolder = "Irene-Uren";
 const String defaultDirectory = '/home/a804/Documents'; //for testing
@@ -20,12 +21,29 @@ void setStoreLocation(String s) {
   _optionStorage.update('$store$s', store);
 }
 
+void setPrefLang(String s) {
+  _optionStorage.update('$lang$s', lang);
+}
+
 Future<String> getStoreLocation() async {
   var data = (await _optionStorage.readAllData());
-  if (data.isEmpty) return '';
   return data
       .firstWhere((e) => e.startsWith(store), orElse: () => '')
       .replaceFirst(store, '');
+}
+
+Future<String> getPrefLang() async {
+  var data = (await _optionStorage.readAllData());
+  return data
+      .firstWhere((e) => e.startsWith(lang), orElse: () => 'en')
+      .replaceFirst(lang, '');
+}
+
+String getPrefLangSync() {
+  var data = _optionStorage.readAllDataSync();
+  return data
+      .firstWhere((e) => e.startsWith(lang), orElse: () => 'en')
+      .replaceFirst(lang, '');
 }
 
 void deleteRegAction(RegAct cus) {
@@ -150,6 +168,22 @@ class _SuperStorage {
 
   Future<List<String>> readAllData() async {
     return await _doAction(() => _readAllData());
+  }
+
+  List<String> readAllDataSync() {
+    try {
+      if (_file == null) return [];
+      if (!_file!.existsSync()) {
+        //create the directory
+        _file!.createSync(recursive: true);
+        return [];
+      }
+      // Read the file
+      return (_file!.readAsLinesSync()).sublist(1);
+    } catch (e) {
+      // If we encounter an error, return 0
+      return [];
+    }
   }
 
   Future<List<String>> _readAllData() async {

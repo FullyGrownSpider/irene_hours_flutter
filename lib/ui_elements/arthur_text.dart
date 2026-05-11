@@ -12,6 +12,6 @@ Widget arthurButton({required VoidCallback onPressed, required child}) =>
       child: TextButton(
         onPressed: onPressed,
         child: child,
-        style: TextButton.styleFrom(backgroundColor: Color(0xFF20801E), side: BorderSide(width: 2.0)),
+        style: TextButton.styleFrom(backgroundColor: Color(0xFF20801E), side: BorderSide(width: 2.2)),
       ),
     );

@@ -20,12 +20,12 @@ class AddAfterScreen extends StatefulWidget {
 
 class _AddAfterScreenState extends State<AddAfterScreen> {
   TimePicker hour = TimePicker();
-  DatePicker date = DatePicker(language['day']!);
+  DatePicker date = DatePicker(language[Words.day]!);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.grey,
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -40,7 +40,7 @@ class _AddAfterScreenState extends State<AddAfterScreen> {
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                child: arthurText(language['cancel']!),
+                child: arthurText(language[Words.cancel]!),
               ),
               arthurButton(
                 onPressed: () {
@@ -55,7 +55,7 @@ class _AddAfterScreenState extends State<AddAfterScreen> {
                   );
                   Navigator.pop(context);
                 },
-                child: arthurText(language['submit']!),
+                child: arthurText(language[Words.submit]!),
               ),
             ],
           ),

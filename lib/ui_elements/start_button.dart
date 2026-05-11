@@ -7,8 +7,8 @@ import 'arthur_text.dart';
 class StartButton {
   DateTime? startTime;
   Widget indicator = arthurText('  🔴');
-  Widget stoppedText = arthurText(language['start']!);
-  Widget startedText = arthurText(language['stop']!);
+  Widget stoppedText = arthurText(language[Words.start]!);
+  Widget startedText = arthurText(language[Words.stop]!);
   final Function(RegAct) exportRegAct;
   final String Function() getCompany;
   final String Function() getAction;

@@ -8,15 +8,6 @@ import 'loading.dart';
 //TODO other lang
 final String _workTimeReplace = "WERKTIJD";
 final String _tableReplaceReplace = "TABLEDATA";
-final String _tableTop = """
-<tr>
-<td>Bedrijf</td>
-<td>Soort activiteit</td>
-<td>Start tijd</td>
-<td>Eind tijd</td>
-<td>Totale Tijd</td>
-</tr>
-""";
 
 Future<void> exportToHTML(
   String fullPath,
@@ -27,13 +18,13 @@ Future<void> exportToHTML(
       !Directory(
         fullPath.substring(0, fullPath.lastIndexOf(Platform.pathSeparator)),
       ).existsSync()) {
-    showDialoge(language['noPath']!);
+    showDialoge(language[Words.noPath]!);
     return;
   }
   List<RegAct> actions = [];
   actions.addAll(actionsList);
   if (actions.isEmpty) {
-    showDialoge(language['noData']!);
+    showDialoge(language[Words.noData]!);
     return;
   }
 
@@ -174,7 +165,7 @@ String createRowsWithSingleDate(DateTime day, List<String> otherData, int time, 
   if (!single) {
     buf.write(createDateBottom(companyTime));
   }
-  buf.write(_tableTop);
+  buf.write(language[Words.tableTop]!);
   for (var item in otherData){
     buf.write(item);
     buf.write(rowEnd());

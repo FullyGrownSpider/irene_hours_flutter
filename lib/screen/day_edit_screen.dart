@@ -16,7 +16,7 @@ class DayEditScreen extends StatefulWidget {
 }
 
 class _DayEditScreenState extends State<DayEditScreen> {
-  DatePicker dayPicker = DatePicker(language['selectedDay']!);
+  DatePicker dayPicker = DatePicker(language[Words.selectedDay]!);
   List<RegActDisplay> regActs = [];
 
   late DateTime _curDate;
@@ -26,7 +26,7 @@ class _DayEditScreenState extends State<DayEditScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.grey,
       body: LayoutBuilder(
         builder: (BuildContext subcontext, BoxConstraints viewportConstraints) {
           return SingleChildScrollView(
@@ -54,11 +54,11 @@ class _DayEditScreenState extends State<DayEditScreen> {
                           Text('  '),
                           arthurButton(
                             onPressed: () => saveClick(context),
-                            child: arthurText(language['ok']!),
+                            child: arthurText(language[Words.save]!),
                           ),
                           arthurButton(
                             onPressed: () => Navigator.pop(context),
-                            child: arthurText(language['cancel']!),
+                            child: arthurText(language[Words.cancel]!),
                           ),
                         ],
                       ),

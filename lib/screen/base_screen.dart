@@ -5,6 +5,7 @@ import 'package:irene_hours/ui_elements/add_remove_box.dart';
 import 'package:irene_hours/loading/loading.dart';
 import 'package:irene_hours/ui_elements/arthur_text.dart';
 import 'package:irene_hours/ui_elements/day-picker.dart';
+import 'package:irene_hours/ui_elements/lang_picker.dart';
 import 'package:irene_hours/ui_elements/start_button.dart';
 
 import '../translations.dart';
@@ -21,6 +22,7 @@ class BaseScreen extends StatefulWidget {
 
 class _BaseScreenState extends State<BaseScreen> {
   AddRemoveBox? companyBox, actionBox;
+  late LangPicker langPicker;
   late DatePicker daysStart, daysEnd;
 
   late StartButton startButton = StartButton(
@@ -38,7 +40,7 @@ class _BaseScreenState extends State<BaseScreen> {
       });
     },
     () {
-      _showMyDialog(language['forgotSelect']!);
+      _showMyDialog(language[Words.forgotSelect]!);
     },
   );
 
@@ -48,7 +50,7 @@ class _BaseScreenState extends State<BaseScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.grey,
       body: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: SingleChildScrollView(
@@ -80,7 +82,7 @@ class _BaseScreenState extends State<BaseScreen> {
                   arthurButton(
                     onPressed: () {
                       if (selectedCompany.isEmpty || selectedAction.isEmpty) {
-                        _showMyDialog(language['forgotSelect']!);
+                        _showMyDialog(language[Words.forgotSelect]!);
                         return;
                       }
                       Navigator.push(
@@ -92,7 +94,7 @@ class _BaseScreenState extends State<BaseScreen> {
                       );
                     },
 
-                    child: arthurText(language['afterwards']!),
+                    child: arthurText(language[Words.afterwards]!),
                   ),
                   arthurButton(
                     onPressed: () {
@@ -103,7 +105,7 @@ class _BaseScreenState extends State<BaseScreen> {
                         ),
                       );
                     },
-                    child: arthurText(language['editDay']!),
+                    child: arthurText(language[Words.editDay]!),
                   ),
                 ],
               ),
@@ -128,12 +130,12 @@ class _BaseScreenState extends State<BaseScreen> {
                         _showMyDialog,
                       );
                     },
-                    child: arthurText(language['dayExport']!),
+                    child: arthurText(language[Words.dayExport]!),
                   ),
                   arthurButton(
                     onPressed: () {
                       if (companyBox!.getSelected().isEmpty) {
-                        _showMyDialog(language['forgotSelect']!);
+                        _showMyDialog(language[Words.forgotSelect]!);
                         return;
                       }
                       widget.l.createExport(
@@ -143,7 +145,7 @@ class _BaseScreenState extends State<BaseScreen> {
                         _showMyDialog,
                       );
                     },
-                    child: arthurText(language['companyExport']!),
+                    child: arthurText(language[Words.companyExport]!),
                   ),
                 ],
               ),
@@ -152,7 +154,7 @@ class _BaseScreenState extends State<BaseScreen> {
                 onPressed: () {
                   widget.l.exportHTML();
                 },
-                child: arthurText(language['defaultHTML']!),
+                child: arthurText(language[Words.defaultHTML]!),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -161,7 +163,7 @@ class _BaseScreenState extends State<BaseScreen> {
                     onPressed: () {
                       setStorageLocation(context);
                     },
-                    child: arthurText(language['exportLocation']!),
+                    child: arthurText(language[Words.exportLocation]!),
                   ),
                   FutureBuilder(
                     future: widget.l.getPath(),
@@ -170,6 +172,7 @@ class _BaseScreenState extends State<BaseScreen> {
                   ),
                 ],
               ),
+              langPicker.getMyWidget()
             ],
           ),
         ),
@@ -180,13 +183,14 @@ class _BaseScreenState extends State<BaseScreen> {
   @override
   void initState() {
     super.initState();
-    daysEnd = DatePicker(language['dayPickEnd']!);
-    daysStart = DatePicker(language['dayPickStart']!);
+    daysEnd = DatePicker(language[Words.dayPickEnd]!);
+    daysStart = DatePicker(language[Words.dayPickStart]!);
+    langPicker = LangPicker((newLang) => setState(() {}), Loading().getLangSync);
   }
 
   AddRemoveBox createCompanyBox(BuildContext context, List<String> data) {
     return AddRemoveBox(
-      language['companies']!,
+      language[Words.companies]!,
       data,
       (s) {
         setState(() {
@@ -196,7 +200,7 @@ class _BaseScreenState extends State<BaseScreen> {
       (s) => selectedCompany = s,
       () => selectedCompany,
       (s) {
-        displayTextInputDialog(context, s).then((e) {
+        displayTextInputDialog(context, s, language[Words.companyInput]!).then((e) {
           if (e == null || e.isEmpty) return;
           setState(() {
             widget.l.storeCompany(e);
@@ -208,7 +212,7 @@ class _BaseScreenState extends State<BaseScreen> {
 
   AddRemoveBox createActionBox(BuildContext context, List<String> data) {
     return AddRemoveBox(
-      language['actions']!,
+      language[Words.actions]!,
       data,
       (s) {
         widget.l.removeActionFromStorage(s);
@@ -217,7 +221,7 @@ class _BaseScreenState extends State<BaseScreen> {
       (s) => selectedAction = s,
       () => selectedAction,
       (s) {
-        displayTextInputDialog(context, s).then((e) {
+        displayTextInputDialog(context, s, language[Words.actionInput]!).then((e) {
           if (e == null || e.isEmpty) return;
           setState(() {
             widget.l.storeAction(e);
@@ -234,7 +238,7 @@ class _BaseScreenState extends State<BaseScreen> {
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: arthurText(language['problem']!),
+          title: arthurText(language[Words.problem]!),
           content: SingleChildScrollView(
             child: ListBody(children: <Widget>[arthurText(s)]),
           ),
@@ -252,7 +256,7 @@ class _BaseScreenState extends State<BaseScreen> {
   }
 
   void setStorageLocation(BuildContext context) {
-    displayTextInputDialog(context, '').then((e) {
+    displayTextInputDialog(context, '', language[Words.askPath]!).then((e) {
       if (e == null) return;
       widget.l.setPath(e);
     });

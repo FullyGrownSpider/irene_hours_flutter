@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:irene_hours/loading/loading.dart';
 import 'package:irene_hours/screen/base_screen.dart';
 import 'package:irene_hours/translations.dart';
 import 'package:window_manager/window_manager.dart';
@@ -7,7 +8,7 @@ late final ValueNotifier<int> notifier;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  dutch(); //TODO better spot
+  pickLang(await Loading().getLang());
 
   await windowManager.ensureInitialized();
 

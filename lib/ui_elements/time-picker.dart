@@ -44,8 +44,8 @@ class SingleHour {
 }
 
 class TimePicker {
-  final SingleHour _startTime = SingleHour(language['startTime']!),
-      _endTime = SingleHour(language['stopTime']!);
+  final SingleHour _startTime = SingleHour(language[Words.startTime]!),
+      _endTime = SingleHour(language[Words.stopTime]!);
 
   TimePicker() {
     _startTime._notifier.addListener(_checkIt);
