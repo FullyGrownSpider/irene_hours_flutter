@@ -4,6 +4,7 @@ import 'package:date_format/date_format.dart';
 import 'package:irene_hours/loading/html_export.dart';
 import 'package:irene_hours/loading/loading_storage.dart';
 import 'package:irene_hours/models/reg_act.dart';
+import 'package:irene_hours/translations.dart';
 
 class Loading {
   static const String htmlFileName = 'usedHTML.html';
@@ -90,7 +91,7 @@ class Loading {
   ) async {
     var fullPath = await getPath();
     if (fullPath.isEmpty) {
-      exportToHTML('', [], showMyDialog);
+      exportToHTML('', '', [], showMyDialog);
       return;
     }
     var allActions = await getRegActions(start, end);
@@ -100,10 +101,12 @@ class Loading {
       fullPath += '-$companyName';
     }
     fullPath += formatDate(start, [yy, '-', mm, '-', dd]);
+    var fullText = language[Words.startDate]! + formatDate(start, [': ', yy, '-', mm, '-', dd]);
     if (!RegAct.sameDay(start, end)) {
-      fullPath += '_${formatDate(start, [yy, '-', mm, '-', dd])}';
+      fullPath += '_${formatDate(end, [yy, '-', mm, '-', dd])}';
+      fullText += ' ${language[Words.endDate]!} ${formatDate(end, [yy, '-', mm, '-', dd])}';
     }
-    exportToHTML('${fullPath.replaceAll(Platform.pathSeparator + Platform.pathSeparator, Platform.pathSeparator)}.html', allActions, showMyDialog);
+    exportToHTML(fullText, '${fullPath.replaceAll(Platform.pathSeparator + Platform.pathSeparator, Platform.pathSeparator)}.html', allActions, showMyDialog);
   }
 
   Future<void> exportHTML() async {

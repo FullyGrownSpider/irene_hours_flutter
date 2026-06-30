@@ -20,7 +20,7 @@ class AddAfterScreen extends StatefulWidget {
 
 class _AddAfterScreenState extends State<AddAfterScreen> {
   TimePicker hour = TimePicker();
-  DatePicker date = DatePicker(language[Words.day]!);
+  DatePicker date = DatePicker(language[Words.dayArrow]!);
 
   @override
   Widget build(BuildContext context) {

@@ -56,6 +56,9 @@ Future<void> addRegAction(RegAct cus) {
 
 Future<List<RegAct>> getRegActions(DateTime start, DateTime end) async {
   var days = end.difference(start).inDays;
+  if (days == 0) {
+    days++;
+  }
   List<RegAct> list = [];
   List<Future> todos = [];
   for (int i = 0; i <= days; i++) {

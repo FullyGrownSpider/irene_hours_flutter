@@ -2,7 +2,9 @@ Map<Words, String> language = {};
 
 void dutch(){
   language[Words.companies] = 'Bedrijven';
+  language[Words.company] = 'Bedrijf';
   language[Words.actions] = 'De actie';
+  language[Words.action] = 'Actie';
   language[Words.dayExport] = 'Export alles';
   language[Words.companyExport] = 'Export bedrijf voor dagen';
   language[Words.afterwards] = 'Achteraf toevoegen';
@@ -13,16 +15,24 @@ void dutch(){
   language[Words.actionInput] = 'Voer soort actie in';
   language[Words.companyInput] = 'Voer bedrijf naam in';
 
+  language[Words.workTime] = 'Werktijd totaal';
+  language[Words.timeTotal] = 'Totaal';
+
   language[Words.start] = 'Start Timer';
   language[Words.stop] = 'Stop Timer';
 
   language[Words.startTime] = 'Van';
   language[Words.stopTime] = 'Tot';
 
+  language[Words.startDate] = 'Voor periode';
+  language[Words.endDate] = 'tot';
+
   language[Words.submit] = 'Voeg toe';
   language[Words.ok] = 'Klaar';
   language[Words.cancel] = 'Cancel';
-  language[Words.day] = 'Dag ⇨ ';
+  language[Words.dayArrow] = 'Dag ⇨ ';
+  language[Words.day] = 'Dag';
+  language[Words.hour] = 'uur';
 
   language[Words.dayPickStart] = 'Export start';
   language[Words.dayPickEnd] = 'Export einde';
@@ -34,6 +44,8 @@ void dutch(){
 
   language[Words.selectedDay] = 'Geselecteerde dag';
   language[Words.save] = 'Sla op';
+  language[Words.fr] = 'Voor';
+
 
   language[Words.noPath] = 'Geen locatie om het file naar te exporteren';
   language[Words.noData] = 'Geen data om te exporteren';
@@ -51,7 +63,9 @@ void dutch(){
 
 void english(){
   language[Words.companies] = 'Companies';
+  language[Words.company] = 'Company';
   language[Words.actions] = 'Action';
+  language[Words.action] = 'Action';
   language[Words.dayExport] = 'Export all';
   language[Words.companyExport] = 'Export company for days';
   language[Words.afterwards] = 'Add afterwards';
@@ -62,16 +76,24 @@ void english(){
   language[Words.actionInput] = 'Input action name';
   language[Words.companyInput] = 'Input company name';
 
+  language[Words.workTime] = 'Total working hours';
+  language[Words.timeTotal] = 'Total';
+
   language[Words.start] = 'Start Timer';
   language[Words.stop] = 'Stop Timer';
 
   language[Words.startTime] = 'From';
   language[Words.stopTime] = 'To';
 
+  language[Words.startDate] = 'From';
+  language[Words.endDate] = 'to';
+
   language[Words.submit] = 'Add';
   language[Words.ok] = 'Done';
   language[Words.cancel] = 'Cancel';
-  language[Words.day] = 'Day ⇨ ';
+  language[Words.dayArrow] = 'Day ⇨ ';
+  language[Words.day] = 'Day';
+  language[Words.hour] = 'hours';
 
   language[Words.dayPickStart] = 'Export start';
   language[Words.dayPickEnd] = 'Export end';
@@ -83,6 +105,7 @@ void english(){
 
   language[Words.selectedDay] = 'Selected day';
   language[Words.save] = 'Commit';
+  language[Words.fr] = 'For';
 
   language[Words.noPath] = 'No storage path found';
   language[Words.noData] = 'No data to export';
@@ -110,4 +133,4 @@ Map<String, String> languageMap(){
   return {'🇬🇧 English-UK': 'en', '🇳🇱 Nederlands': 'nl'};
 }
 
-enum Words { noData, noPath, save, selectedDay, inputText, forgotSelect, problem, dayPickEnd,dayPickStart, day, cancel, ok, submit, stopTime, startTime, stop, start, actionInput, companyInput, askPath, exportLocation, defaultHTML, editDay, afterwards, companyExport, dayExport, actions, companies, tableTop}
+enum Words { startDate, endDate, day, hour, timeTotal, company, action, fr, workTime, noData, noPath, save, selectedDay, inputText, forgotSelect, problem, dayPickEnd,dayPickStart, dayArrow, cancel, ok, submit, stopTime, startTime, stop, start, actionInput, companyInput, askPath, exportLocation, defaultHTML, editDay, afterwards, companyExport, dayExport, actions, companies, tableTop}

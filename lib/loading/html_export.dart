@@ -10,6 +10,7 @@ final String _workTimeReplace = "WERKTIJD";
 final String _tableReplaceReplace = "TABLEDATA";
 
 Future<void> exportToHTML(
+  String dateText,
   String fullPath,
   List<RegAct> actionsList,
   void Function(String) showDialoge,
@@ -29,14 +30,14 @@ Future<void> exportToHTML(
   }
 
   actions.sort((a, b) => a.compareTo(b));
-  var data = await createFile(actions);
+  var data = await createFile(actions,dateText);
 
   // Save the document...
   File(fullPath).writeAsString(data);
 }
 
 //actions cant have 0 items or there will be an error
-Future<String> createFile(List<RegAct> actions) async {
+Future<String> createFile(List<RegAct> actions, String dateText) async {
   String newFile = await Loading().readHTML();
 
   StringBuffer tableBuf = StringBuffer();
@@ -48,6 +49,7 @@ Future<String> createFile(List<RegAct> actions) async {
   var companyTime = <String,int>{};
   var companyTimeFull = <String,int>{};
   int totalForThisDay = 0;
+  int totalTotal = 0;
   DateTime prevDay = actions.first.day;
   for (var action in actions) {
     if (action.day.difference(prevDay).inDays >= 1) {
@@ -59,6 +61,7 @@ Future<String> createFile(List<RegAct> actions) async {
       currentRow.add(createRowsWithSingleDate(prevDay, rowsNoDate, timePrint, companyTime, single));
       prevDay = action.day;
       prevCompany = action.companyName;
+      totalTotal += totalForThisDay;
       totalForThisDay = 0;
       rowsNoDate.clear();
       mapCopy(companyTime, companyTimeFull);
@@ -70,18 +73,17 @@ Future<String> createFile(List<RegAct> actions) async {
 
     if (prevCompany == action.companyName){
       sameCompany++;
-      if (companyTime[action.companyName] == null) {
-        companyTime[action.companyName] = action.getTime();
-      } else {
-        companyTime[action.companyName] = companyTime[action.companyName]! + action.getTime();
-      }
       //Store the action
     } else {
-      companyTime[action.companyName] = action.getTime();
       int index = rowsNoDate.length-sameCompany - 1;
       rowsNoDate[index] = createLayerdItem(prevCompany, sameCompany) + rowsNoDate[index];
       prevCompany = action.companyName;
       sameCompany = 1;
+    }
+    if (!companyTime.containsKey(action.companyName)) {
+      companyTime[action.companyName] = action.getTime();
+    } else {
+      companyTime[action.companyName] = companyTime[action.companyName]! + action.getTime();
     }
 
   }
@@ -89,21 +91,23 @@ Future<String> createFile(List<RegAct> actions) async {
   int index = rowsNoDate.length-sameCompany;
   rowsNoDate[index] = createLayerdItem(prevCompany, sameCompany) + rowsNoDate[index];
   //add final day
+  totalTotal += totalForThisDay;
   currentRow.add(createRowsWithSingleDate(prevDay, rowsNoDate, totalForThisDay, companyTime, single));
   for (var row in currentRow) {
     tableBuf.write(row);
   }
   mapCopy(companyTime, companyTimeFull);
 
-  StringBuffer minutesStringTot = StringBuffer('<tr>Werktijd totaal: ${createTimeText(companyTimeFull.values.fold(0, (a, b) => a+b))}</tr>');
+  StringBuffer minutesStringTot = StringBuffer('<tr><td>$dateText</td></tr>\n<tr><td>${language[Words.workTime]}: ${createTimeText(
+      totalTotal)}</td></tr>\n');
   if (!single) {
     for (var time in companyTimeFull.entries) {
       minutesStringTot.write(
-          '<tr>\nVoor ${time.key} : ${createTimeText(time.value)}</tr>');
+          '<tr><td>${language[Words.fr]} ${time.key} : ${createTimeText(time.value)}</td></tr>\n');
     }
     newFile = newFile.replaceAll(_workTimeReplace, minutesStringTot.toString());
   } else {
-    newFile = newFile.replaceAll(_workTimeReplace, 'Voor $prevCompany $minutesStringTot');
+    newFile = newFile.replaceAll(_workTimeReplace, '${language[Words.fr]} $prevCompany $minutesStringTot');
   }
   newFile = newFile.replaceFirst(_tableReplaceReplace, tableBuf.toString());
   return newFile;
@@ -124,7 +128,7 @@ String biggerColumn(String data, int columns, String align) {
 }
 
 String createDateTop(String date, String time){
-  return rowStart() + biggerColumn("Dag: $date",3,"center")+biggerColumn("Totaal: $time",2,"right")+ rowEnd();
+  return rowStart() + biggerColumn("${language[Words.day]}: $date",3,"center")+biggerColumn("${language[Words.timeTotal]}: $time",2,"right")+ rowEnd();
 }
 
 String createLayerdItem(String data, int amount) {
@@ -138,8 +142,8 @@ String createDateBottom(Map<String, int> compTime){
       compTime.entries.toList()..sort((e1, e2) => e1.key.compareTo(e2.key))).entries;
   for (var cT in sortedByKeyMap){
   buf.write(rowStart());
-  buf.write(biggerColumn("Voor ${cT.key}", 3, "center"));
-  buf.write(biggerColumn("${createTimeText(cT.value)} uur", 2, "right"));
+  buf.write(biggerColumn("${language[Words.fr]} ${cT.key}", 3, "center"));
+  buf.write(biggerColumn("${createTimeText(cT.value)} ${language[Words.hour]}", 2, "right"));
   buf.write(rowEnd());
   }
   return buf.toString();
