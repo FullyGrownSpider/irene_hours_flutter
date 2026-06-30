@@ -150,7 +150,7 @@ String createTimeText(int minsTot) {
 }
 
 String createDateTimeTimeText(DateTime time) {
-  return formatDate(time, [HH, ':', mm]);
+  return formatDate(time, [HH, ':', nn]);
 }
 String createDateText(DateTime time) {
   return formatDate(time, [d, '-', M, '-', yyyy]);
