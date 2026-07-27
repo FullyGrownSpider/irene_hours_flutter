@@ -96,7 +96,7 @@ class Loading {
       exportToHTML('', '', [], showMyDialog);
       return;
     }
-    var allActions = await getRegActions(start, end, await getAllCompanies());
+    var allActions = await getRegActions(start.add(Duration(days: -1)), end, await getAllCompanies());
     fullPath += '${Platform.pathSeparator}Export';
     if (company != null) {
       allActions.removeWhere((e) => e.companyName != company.companyName);

@@ -59,8 +59,9 @@ class _BaseScreenState extends State<BaseScreen> {
           child: Column(
             children: [
               FutureBuilder(
-                future: widget.l.getAllCompanies(),
+                future: companyBox != null ? null : widget.l.getAllCompanies(),
                 builder: (a, b) {
+                  if (companyBox != null) return companyBox!.getMyWidget();
                   if (!b.hasData) return const Text('');
                   b.data!.sort((a, b) => a.compareTo(b));
                   companyBox = createCompanyBox(context, b.data!);
@@ -68,8 +69,9 @@ class _BaseScreenState extends State<BaseScreen> {
                 },
               ),
               FutureBuilder(
-                future: widget.l.getAllActions(),
+                future: actionBox != null ? null : widget.l.getAllActions(),
                 builder: (a, b) {
+                  if (actionBox != null) return actionBox!.getMyWidget();
                   if (!b.hasData) return const Text('');
                   b.data!.sort((a, b) => a.compareTo(b));
                   actionBox = createActionBox(context, b.data!);
