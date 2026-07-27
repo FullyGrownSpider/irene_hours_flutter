@@ -4,6 +4,7 @@ import 'package:date_format/date_format.dart';
 import 'package:irene_hours/loading/button_conversion.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../models/company.dart';
 import '../models/reg_act.dart';
 
 final _SuperStorage _companyStorage = _SuperStorage("Companies");
@@ -13,7 +14,7 @@ const String store = 'Store○';
 const String lang = 'Lang○';
 
 const defaultFolder = "Irene-Uren";
-const String defaultDirectory = '/home/a804/Documents'; //for testing
+const String defaultDirectory = 'C:\\Users\\a804\\Documents\\Fuch'; //for testing
 //never gets emptied, except on restart
 Map<String, _SuperStorage> _filesInMemory = {};
 
@@ -54,7 +55,7 @@ Future<void> addRegAction(RegAct cus) {
   return _getFileForRegActions(cus.day).addItem(actionExportGenerator(cus));
 }
 
-Future<List<RegAct>> getRegActions(DateTime start, DateTime end) async {
+Future<List<RegAct>> getRegActions(DateTime start, DateTime end, List<Company> companies) async {
   var days = end.difference(start).inDays;
   if (days == 0) {
     days++;
@@ -66,7 +67,7 @@ Future<List<RegAct>> getRegActions(DateTime start, DateTime end) async {
     todos.add(
       _getFileForRegActions(date).readAllData().then(
         (itemList) => list.addAll(
-          itemList.map((item) => actionImportGenerator(item, date)),
+          itemList.map((item) => regactImportGenerator(item, date, companies)),
         ),
       ),
     );
@@ -106,14 +107,14 @@ void deleteCompany(String cus) {
   _companyStorage.delete(idOnlyExportGenerator(cus));
 }
 
-void addCompany(String cus) {
-  _companyStorage.addItem(idOnlyExportGenerator(cus));
+void addCompany(Company cus) {
+  _companyStorage.update(companyExportGenerator(cus), idOnlyExportGenerator(cus.companyName));
 }
 
-Future<List<String>> getAllCompanies() async {
+Future<List<Company>> getAllCompaniesFromStorage() async {
   var list = (await _companyStorage.readAllData());
   if (list.isEmpty) return [];
-  return list.map((e) => idOnlyImportGenerator(e)).toList();
+  return list.map((e) => companyImportGenerator(e)).toList();
 }
 
 Future<String> localPath() async {

@@ -6,19 +6,21 @@ import 'package:irene_hours/loading/loading_storage.dart';
 import 'package:irene_hours/models/reg_act.dart';
 import 'package:irene_hours/translations.dart';
 
+import '../models/company.dart';
+
 class Loading {
   static const String htmlFileName = 'usedHTML.html';
 
-  void storeCompany(String companyName) {
-    addCompany(companyName);
+  void storeCompany(Company company) {
+    addCompany(company);
   }
 
   void removeCompanyFromStorgage(String companyName) {
     deleteCompany(companyName);
   }
 
-  Future<List<String>> getAllCompanyNames() async {
-    return await getAllCompanies();
+  Future<List<Company>> getAllCompanies() async {
+    return await getAllCompaniesFromStorage();
   }
 
   void removeActionFromStorage(String s) {
@@ -41,8 +43,8 @@ class Loading {
     deleteRegAction(ra);
   }
 
-  Future<List<RegAct>> getAllRegActions(DateTime dayFrom, DateTime dayTo) {
-    return getRegActions(dayFrom, dayTo);
+  Future<List<RegAct>> getAllRegActions(DateTime dayFrom, DateTime dayTo, List<Company> companies) {
+    return getRegActions(dayFrom, dayTo, companies);
   }
 
   Future<String> readHTML() async {
@@ -86,7 +88,7 @@ class Loading {
   void createExport(
     DateTime start,
     DateTime end,
-    String? companyName,
+    Company? company,
     Future<void> Function(String s) showMyDialog,
   ) async {
     var fullPath = await getPath();
@@ -94,11 +96,11 @@ class Loading {
       exportToHTML('', '', [], showMyDialog);
       return;
     }
-    var allActions = await getRegActions(start, end);
+    var allActions = await getRegActions(start, end, await getAllCompanies());
     fullPath += '${Platform.pathSeparator}Export';
-    if (companyName != null) {
-      allActions.removeWhere((e) => e.companyName != companyName);
-      fullPath += '-$companyName';
+    if (company != null) {
+      allActions.removeWhere((e) => e.companyName != company.companyName);
+      fullPath += '-${company.companyName}';
     }
     fullPath += formatDate(start, [yy, '-', mm, '-', dd]);
     var fullText = language[Words.startDate]! + formatDate(start, [': ', yy, '-', mm, '-', dd]);

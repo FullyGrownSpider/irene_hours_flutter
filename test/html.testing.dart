@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:irene_hours/loading/html_export.dart';
 import 'package:irene_hours/loading/loading.dart';
 import 'package:irene_hours/loading/loading_storage.dart';
+import 'package:irene_hours/models/company.dart';
 import 'package:irene_hours/models/reg_act.dart';
 import 'package:irene_hours/translations.dart';
 
@@ -29,9 +30,11 @@ void main() {
 }
 
 Future<void> myTest() async {
-  var t= await createFile(createList(3));
-
-  var tx= await createFile(createList(1));
+  // var t= await createFile(createList(3));
+  //
+  // var tx= await createFile(createList(1));
+  //
+  // var ty =await createFile(createList2());
   var x = 1;
 
 }
@@ -41,8 +44,20 @@ List<RegAct> createList(int comp){
   for (int i = 0; i < 30; i++) {
     var time = DateTime.now();
     time = time.add(Duration(hours: i));
-    list.add(RegAct(time, "Bedrijf${r.nextInt(comp)}", "actie${(i/2).toInt()}", time.add(Duration(minutes: 10)),time.add(Duration(days: (i/3).toInt()))));
+    list.add(RegAct(time, Company("${language[Words.companies]}${r.nextInt(comp)}"), "${language[Words.theAction]}${(i/2).toInt()}", time.add(Duration(minutes: 10)),time.add(Duration(days: (i/3).toInt()))));
   }
+  return list;
+}
+
+
+List<RegAct> createList2(){
+  List<RegAct> list = [];
+  var timeBase = DateTime.now();
+  var time = timeBase.add(Duration(hours: 1));
+  list.add(RegAct(time, Company("BedrijfX"), "actieX", time.add(Duration(minutes: 10)),timeBase));
+  time = time.add(Duration(hours: 1));
+  list.add(RegAct(time, Company("BedrijfX"), "actieX", time.add(Duration(minutes: 30)),timeBase));
+
   return list;
 }
 
@@ -121,7 +136,7 @@ List<RegAct> _conversionList() {
     10,
     (int index) => RegAct(
       DateTime.now().add(Duration(minutes: -20 + -60 * index)),
-      'companyName:$index',
+      Company('companyName:$index'),
       ' actionName',
       DateTime.now().add(Duration(minutes: -10 + -60 * index)),
       DateTime.now(),
@@ -132,7 +147,7 @@ List<RegAct> _conversionList() {
 
 RegAct _uniqueRegAct() => RegAct(
   DateTime.now().add(Duration(minutes: (-20))),
-  'companyName:-1',
+    Company('companyName:-1'),
   ' actionName',
   DateTime.now().add(Duration(minutes: -10)),
   DateTime.now(),

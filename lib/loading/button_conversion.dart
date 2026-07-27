@@ -1,3 +1,4 @@
+import '../models/company.dart';
 import '../models/reg_act.dart';
 
 /// class used to turn the values used by buttons into string and back
@@ -11,32 +12,28 @@ Map<String, String> lineConversion(String line) {
       .split(storageSep)
       .where((e) => e.length > 2 && e.contains(storageIdentifier))
       .forEach((o) {
-    var value = o.split(storageIdentifier);
-    map[value[0]] = value[1];
-  });
+        var value = o.split(storageIdentifier);
+        map[value[0]] = value[1];
+      });
   return map;
 }
 
-RegAct actionImportGenerator(String line, DateTime date) {
+RegAct regactImportGenerator(String line, DateTime date, List<Company> companies) {
   var list = lineConversion(line);
   return RegAct(
-    dataImportGenerator<DateTime>(
-      list[_basicValuesToString(_BasicValues.v1)],
-    ),
-    dataImportGenerator<String>(list[_basicValuesToString(_BasicValues.v2)]),
+    dataImportGenerator<DateTime>(list[_basicValuesToString(_BasicValues.v1)]),
+    companies.firstWhere((e) => e.companyName == dataImportGenerator<String>(list[_basicValuesToString(_BasicValues.v2)])),
     dataImportGenerator<String>(list[_basicValuesToString(_BasicValues.v3)]),
-    dataImportGenerator<DateTime>(
-      list[_basicValuesToString(_BasicValues.v4)],
-    ),
+    dataImportGenerator<DateTime>(list[_basicValuesToString(_BasicValues.v4)]),
     date,
   );
 }
 
 String actionExportGenerator(RegAct action) {
   return dataExportGenerator(
-    action.startTime,
-    _basicValuesToString(_BasicValues.v1),
-  ) +
+        action.startTime,
+        _basicValuesToString(_BasicValues.v1),
+      ) +
       dataExportGenerator(
         action.actionName,
         _basicValuesToString(_BasicValues.v3),
@@ -63,6 +60,26 @@ String idOnlyExportGenerator(String action) {
   return dataExportGenerator(action, _basicValuesToString(_BasicValues.id));
 }
 
+String companyExportGenerator(Company com) {
+  return dataExportGenerator(
+        com.companyName,
+        _basicValuesToString(_BasicValues.id),
+      ) +
+      dataExportGenerator(
+        com.pricePerHour,
+        _basicValuesToString(_BasicValues.v1),
+      ) +
+      storageSep;
+}
+
+Company companyImportGenerator(String line) {
+    var list = lineConversion(line);
+    return Company(
+      dataImportGenerator<String>(list[_basicValuesToString(_BasicValues.id)]),
+      dataImportGenerator<int>(list[_basicValuesToString(_BasicValues.v1)]));
+  }
+
+
 String _basicValuesToString(_BasicValues val) {
   var data = val.toString().split('.');
   return data[data.length - 1];
@@ -86,14 +103,12 @@ dynamic dataImportGenerator<T>(String? sx) {
       return DateTime.now();
     } else {
       List x = s.split(storageListSep);
-        return DateTime(
-        DateTime
-            .now()
-            .year,
+      return DateTime(
+        DateTime.now().year,
         1,
         1,
-        dataImportGenerator<int>(x[x.length -2]),
-        dataImportGenerator<int>(x[x.length -1]),
+        dataImportGenerator<int>(x[x.length - 2]),
+        dataImportGenerator<int>(x[x.length - 1]),
       );
     }
   }

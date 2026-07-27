@@ -3,11 +3,13 @@ import 'package:irene_hours/screen/add_after_screen.dart';
 import 'package:irene_hours/screen/day_edit_screen.dart';
 import 'package:irene_hours/ui_elements/add_remove_box.dart';
 import 'package:irene_hours/loading/loading.dart';
+import 'package:irene_hours/ui_elements/add_remove_company_box.dart';
 import 'package:irene_hours/ui_elements/arthur_text.dart';
 import 'package:irene_hours/ui_elements/day-picker.dart';
 import 'package:irene_hours/ui_elements/lang_picker.dart';
 import 'package:irene_hours/ui_elements/start_button.dart';
 
+import '../models/company.dart';
 import '../translations.dart';
 import '../ui_elements/text_input_popup.dart';
 
@@ -44,8 +46,8 @@ class _BaseScreenState extends State<BaseScreen> {
     },
   );
 
-  String selectedCompany = '';
-  String selectedAction = '';
+  Company? selectedCompany;
+  String? selectedAction;
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +59,7 @@ class _BaseScreenState extends State<BaseScreen> {
           child: Column(
             children: [
               FutureBuilder(
-                future: widget.l.getAllCompanyNames(),
+                future: widget.l.getAllCompanies(),
                 builder: (a, b) {
                   if (!b.hasData) return const Text('');
                   b.data!.sort((a, b) => a.compareTo(b));
@@ -81,7 +83,7 @@ class _BaseScreenState extends State<BaseScreen> {
                 children: [
                   arthurButton(
                     onPressed: () {
-                      if (selectedCompany.isEmpty || selectedAction.isEmpty) {
+                      if (selectedCompany == null || selectedAction == null) {
                         _showMyDialog(language[Words.forgotSelect]!);
                         return;
                       }
@@ -89,7 +91,7 @@ class _BaseScreenState extends State<BaseScreen> {
                         context,
                         MaterialPageRoute<void>(
                           builder: (context) =>
-                              AddAfterScreen(selectedCompany, selectedAction),
+                              AddAfterScreen(selectedCompany!, selectedAction!),
                         ),
                       );
                     },
@@ -134,7 +136,7 @@ class _BaseScreenState extends State<BaseScreen> {
                   ),
                   arthurButton(
                     onPressed: () {
-                      if (companyBox!.getSelected().isEmpty) {
+                      if (companyBox!.getSelected() == null) {
                         _showMyDialog(language[Words.forgotSelect]!);
                         return;
                       }
@@ -188,35 +190,40 @@ class _BaseScreenState extends State<BaseScreen> {
     langPicker = LangPicker((newLang) => setState(() {}), Loading().getLangSync);
   }
 
-  AddRemoveBox createCompanyBox(BuildContext context, List<String> data) {
-    return AddRemoveBox(
+  AddRemoveCompanyBox createCompanyBox(BuildContext context, List<Company> data) {
+    return AddRemoveCompanyBox(
       language[Words.companies]!,
-      data,
+      data.map((e) => e.companyName).toList(),
       (s) {
         setState(() {
           widget.l.removeCompanyFromStorgage(s);
         });
       },
-      (s) => selectedCompany = s,
+      (s) {
+        var company = data.firstWhere((e) => e.companyName == s, orElse: () => Company(''));
+        if (company.companyName.isNotEmpty){
+          selectedCompany = company;
+        }
+        setState(() {});},
       () => selectedCompany,
       (s) {
         displayTextInputDialog(context, s, language[Words.companyInput]!).then((e) {
           if (e == null || e.isEmpty) return;
           setState(() {
-            widget.l.storeCompany(e);
+            widget.l.storeCompany(Company(e));
           });
         });
       },
+      widget.l.storeCompany
     );
   }
 
   AddRemoveBox createActionBox(BuildContext context, List<String> data) {
-    return AddRemoveBox(
-      language[Words.actions]!,
+    return AddRemoveBox<String>(
+      language[Words.theAction]!,
       data,
       (s) {
         widget.l.removeActionFromStorage(s);
-        createCompanyBox(context, data);
       },
       (s) => selectedAction = s,
       () => selectedAction,
@@ -225,7 +232,6 @@ class _BaseScreenState extends State<BaseScreen> {
           if (e == null || e.isEmpty) return;
           setState(() {
             widget.l.storeAction(e);
-            createActionBox(context, data);
           });
         });
       },

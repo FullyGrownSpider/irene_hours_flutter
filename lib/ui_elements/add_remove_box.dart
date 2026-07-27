@@ -1,59 +1,63 @@
 import 'package:flutter/material.dart';
 
-class AddRemoveBox {
-  late final DropdownButton<String> companies;
+class AddRemoveBox<T> {
+  late final DropdownButton<String> dropdown;
   late final IconButton removeButton;
   late final IconButton addButton;
+  final String hint;
   final Icon lockedIcon = Icon(Icons.lock);
-  final String Function() getSelected;
-  bool _active = true;
+  final T? Function() getSelected;
+  @protected
+  bool active = true;
 
   ValueNotifier<bool> change = ValueNotifier<bool>(false);
 
-  AddRemoveBox(String hint, List<String> getAll,
-      void Function(String) removeCompany, void Function(String) setSelected,
+  AddRemoveBox(this.hint, List<String> getAll,
+      void Function(String) removeCompany, void Function(String?) setSelected,
       this.getSelected, void Function(String) createDialoge){
-    companies = _createDropdown(getAll, hint, setSelected, getSelected);
-    removeButton = _createRemoveButton(removeCompany, getSelected, setSelected);
+    dropdown = _createDropdown(getAll, hint, setSelected, getSelected);
+    removeButton = _createRemoveButton(removeCompany, () => getSelected().toString(), setSelected);
     addButton = _createAddButton(createDialoge);
   }
 
   void flipActive(){
-    if (getSelected().isEmpty) return;
-    _active = !_active;
+    if (getSelected() == null) return;
+    active = !active;
   }
 
   Widget getMyWidget(){
     Widget toShow;
-    if (_active) {
-      toShow = Row(mainAxisAlignment: MainAxisAlignment.center,children: [removeButton, companies, addButton]);
+    if (active) {
+      toShow = Row(mainAxisAlignment: MainAxisAlignment.center,children: [removeButton, dropdown, addButton]);
     } else {
-      toShow = Text(getSelected());
+      toShow = Text(getSelected().toString());
     }
     return SizedBox(height: 50, width: 600, child: Center(child: toShow));
   }
-  IconButton _createRemoveButton(void Function(String) removeCompany, String Function() getSelected, void Function(String) setSelected){
+
+  IconButton _createRemoveButton(void Function(String) removeCompany, String Function() getSelected, void Function(String?) setSelected){
     return IconButton(onPressed: (){
       var value = getSelected();
       if (value.isEmpty) return;
       removeCompany(value);
-      setSelected('');
+      setSelected(null);
       change.value = !change.value;
     }, icon: Icon(Icons.remove));
   }
+
   IconButton _createAddButton(void Function(String) createDialoge){
     return IconButton(onPressed: (){
       createDialoge('');
     }, icon: Icon(Icons.add));
   }
 
-  DropdownButton<String> _createDropdown(List<String> companies, String hint, void Function(String) setSelected, String Function() getSelected) {
+  DropdownButton<String> _createDropdown(List<String> companies, String hint, void Function(String) setSelected, T? Function() getSelected) {
     return DropdownButton<String>(
         hint: ValueListenableBuilder(
             valueListenable: change,
-            builder: (context, subValue, widget) => Text(getSelected().isEmpty
+            builder: (context, subValue, widget) => Text(getSelected() == null
                 ? hint
-                : getSelected())),
+                : getSelected().toString())),
         items: companies.map((String value) {
           return DropdownMenuItem<String>(
             value: value,

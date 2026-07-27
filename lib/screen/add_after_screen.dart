@@ -4,12 +4,13 @@ import 'package:irene_hours/translations.dart';
 import 'package:irene_hours/ui_elements/arthur_text.dart';
 
 import '../loading/loading.dart';
+import '../models/company.dart';
 import '../ui_elements/day-picker.dart';
 import '../ui_elements/time-picker.dart';
 
 class AddAfterScreen extends StatefulWidget {
   final Loading l = Loading();
-  final String company;
+  final Company company;
   final String action;
 
   AddAfterScreen(this.company, this.action, {super.key});
@@ -30,7 +31,7 @@ class _AddAfterScreenState extends State<AddAfterScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Center(child: date.getMyWidget(context)),
-          Center(child: arthurText(widget.company)),
+          Center(child: arthurText(widget.company.companyName)),
           Center(child: arthurText(widget.action)),
           Center(child: hour.getMyWidget(context)),
           Row(

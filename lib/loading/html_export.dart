@@ -101,17 +101,27 @@ Future<String> createFile(List<RegAct> actions, String dateText) async {
   StringBuffer minutesStringTot = StringBuffer('<tr><td>$dateText</td></tr>\n<tr><td>${language[Words.workTime]}: ${createTimeText(
       totalTotal)}</td></tr>\n');
   if (!single) {
+    //every total time
     for (var time in companyTimeFull.entries) {
       minutesStringTot.write(
           '<tr><td>${language[Words.fr]} ${time.key} : ${createTimeText(time.value)}</td></tr>\n');
     }
     newFile = newFile.replaceAll(_workTimeReplace, minutesStringTot.toString());
   } else {
+    if (actions.first.company.pricePerHour != 0) {
+      //price calculator
+      var strb = actions.first.company.pricePerHour.toString();
+      var str = ((companyTimeFull.entries.first.value * actions.first.company.pricePerHour)/60).round().toString();
+      minutesStringTot.write('<tr><td>${language[Words.pricePer]} ${language[Words.money]}${moneyString(strb)}</td></tr>\n'
+        '<tr><td>${language[Words.priceTotal]}${language[Words.money]}${moneyString(str)} </td></tr>\n');
+    }
     newFile = newFile.replaceAll(_workTimeReplace, '${language[Words.fr]} $prevCompany $minutesStringTot');
   }
   newFile = newFile.replaceFirst(_tableReplaceReplace, tableBuf.toString());
   return newFile;
 }
+
+String moneyString(String str) => str.length > 2 ? '${str.substring(0, str.length -2)}.${str.substring(str.length -2, str.length)}' : '0.${str.padRight(2,'0')}';
 
 void mapCopy(Map<String, int> companyTime, Map<String, int> companyTimeFull) {
   for (var time in companyTime.entries){

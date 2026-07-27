@@ -1,17 +1,21 @@
+import 'company.dart';
+
 class RegAct implements Comparable<RegAct> {
   final DateTime day;
   final DateTime startTime;
   final DateTime endTime;
-  final String companyName;
+  final Company company;
   final String actionName;
 
   RegAct(
     this.startTime,
-    this.companyName,
+    this.company,
     this.actionName,
     this.endTime,
     this.day,
   );
+
+  String get companyName => company.companyName;
 
   bool isActualTime() {
     return getTime() > 1;

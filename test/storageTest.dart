@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:irene_hours/loading/button_conversion.dart';
 import 'package:irene_hours/loading/loading.dart';
 import 'package:irene_hours/loading/loading_storage.dart';
+import 'package:irene_hours/models/company.dart';
 import 'package:irene_hours/models/reg_act.dart';
 
 void main() {
@@ -35,29 +36,29 @@ void clear() {
 Future<void> _storeActions() async {
   var loading = Loading();
   loading.removeActionFromStorage('s');
-  var data = await loading.getAllCompanyNames();
+  var data = await loading.getAllCompanies();
   expect([], data);
 
   var list = _randomStrings();
   for (var e in list) {
     loading.storeAction(e);
   }
-  data = await loading.getAllActions();
+  var smata = await loading.getAllActions();
   loading.removeActionFromStorage('s');
-  expect(list, data);
+  expect(list, smata);
 }
 
 Future<void> _storeCompanies() async {
   var loading = Loading();
-  var data = await loading.getAllCompanyNames();
+  var data = await loading.getAllCompanies();
   expect([], data);
   loading.removeCompanyFromStorgage('s');
 
   var list = _randomStrings();
   for (var e in list) {
-    loading.storeCompany(e);
+    loading.storeCompany(Company(e));
   }
-  data = await loading.getAllCompanyNames();
+  data = await loading.getAllCompanies();
   loading.removeCompanyFromStorgage('s');
   expect(list, data);
 }
@@ -84,7 +85,7 @@ Future<void> _storeRegAct2Day() async {
   var list = _conversionList();
   var newDay = DateTime.now().add(Duration(days: -1));
   for (var e in list) {
-    loading.storeRegAct(RegAct(e.startTime, e.companyName, e.actionName, e.endTime, newDay));
+    loading.storeRegAct(RegAct(e.startTime, Company(e.companyName), e.actionName, e.endTime, newDay));
     loading.storeRegAct(e);
   }
   var data = await loading.getAllRegActions(DateTime.now().add(Duration(days: -1)), DateTime.now());
@@ -112,7 +113,7 @@ Future<void> _getAndSetExport() async {
 void _conversionTest() {
   var list = _conversionList();
   var oldList = list.map((e) => actionExportGenerator(e)).toList();
-  var newList = oldList.map((e) => actionImportGenerator(e, DateTime.now()));
+  var newList = oldList.map((e) => regactImportGenerator(e, DateTime.now()));
   for (var e in newList) {
     expect(true, list.contains(e));
   }
@@ -123,7 +124,7 @@ List<RegAct> _conversionList() {
     10,
     (int index) => RegAct(
       DateTime.now().add(Duration(minutes: -20 + -60 * index)),
-      'companyName:$index',
+      Company('companyName:$index'),
       ' actionName',
       DateTime.now().add(Duration(minutes: -10 + -60 * index)),
       DateTime.now(),
@@ -134,7 +135,7 @@ List<RegAct> _conversionList() {
 
 RegAct _uniqueRegAct() => RegAct(
     DateTime.now().add(Duration(minutes: (-20))),
-    'companyName:-1',
+    Company('companyName:-1'),
     ' actionName',
     DateTime.now().add(Duration(minutes: -10)),
     DateTime.now());

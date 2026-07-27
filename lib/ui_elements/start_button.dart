@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:irene_hours/models/reg_act.dart';
 
+import '../models/company.dart';
 import '../translations.dart';
 import 'arthur_text.dart';
 
@@ -10,8 +11,8 @@ class StartButton {
   Widget stoppedText = arthurText(language[Words.start]!);
   Widget startedText = arthurText(language[Words.stop]!);
   final Function(RegAct) exportRegAct;
-  final String Function() getCompany;
-  final String Function() getAction;
+  final Company? Function() getCompany;
+  final String? Function() getAction;
   final void Function() flipEnable;
   final void Function() cantStartError;
 
@@ -30,7 +31,7 @@ class StartButton {
   late Widget buttonEnd = arthurButton(onPressed: end, child: startedText);
 
   void start() {
-    if (getAction().isEmpty || getCompany().isEmpty) {
+    if (getAction() == null || getCompany() == null) {
       cantStartError();
       return;
     }
@@ -47,8 +48,8 @@ class StartButton {
     exportRegAct(
       RegAct(
         startTime!,
-        getCompany(),
-        getAction(),
+        getCompany()!,
+        getAction()!,
         DateTime.now(),
         DateTime.now(),
       ),

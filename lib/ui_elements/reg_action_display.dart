@@ -4,10 +4,12 @@ import 'package:irene_hours/ui_elements/arthur_text.dart';
 import 'package:irene_hours/ui_elements/text_input_popup.dart';
 import 'package:irene_hours/ui_elements/time-picker.dart';
 
+import '../models/company.dart';
 import '../translations.dart';
 
 class RegActDisplay {
   final TimePicker _timeStart = TimePicker();
+  final List<Company> companies;
   late final ValueNotifier<String> _companyName = ValueNotifier(
         old.companyName,
       ),
@@ -17,7 +19,7 @@ class RegActDisplay {
   final ValueNotifier<bool> _deleteMe = ValueNotifier(false);
   RegAct old;
 
-  RegActDisplay(this.old) {
+  RegActDisplay(this.old, this.companies) {
     _timeStart.setTimeStart(old.startTime);
     _timeStart.setTimeEnd(old.endTime);
   }
@@ -61,9 +63,11 @@ class RegActDisplay {
     if (_deleteMe.value) {
       return null;
     }
+    var comp = companies.firstWhere((e) => e.companyName == _companyName.value,
+        orElse: () => Company(_companyName.value));
     RegAct newValue = RegAct(
       _timeStart.getStartTime(),
-      _companyName.value,
+      comp,
       _action.value,
       _timeStart.getEndTime(),
       old.day,

@@ -3,7 +3,7 @@ Map<Words, String> language = {};
 void dutch(){
   language[Words.companies] = 'Bedrijven';
   language[Words.company] = 'Bedrijf';
-  language[Words.actions] = 'De actie';
+  language[Words.theAction] = 'De actie';
   language[Words.action] = 'Actie';
   language[Words.dayExport] = 'Export alles';
   language[Words.companyExport] = 'Export bedrijf voor dagen';
@@ -50,6 +50,11 @@ void dutch(){
   language[Words.noPath] = 'Geen locatie om het file naar te exporteren';
   language[Words.noData] = 'Geen data om te exporteren';
 
+  language[Words.money] = '€';
+
+  language[Words.pricePer] = 'Prijs per uur ';
+  language[Words.priceTotal] = 'Totale prijs ';
+
   language[Words.tableTop] = """
 <tr>
 <td>Bedrijf</td>
@@ -61,10 +66,10 @@ void dutch(){
 """;
 }
 
-void english(){
+void englishBR(){
   language[Words.companies] = 'Companies';
   language[Words.company] = 'Company';
-  language[Words.actions] = 'Action';
+  language[Words.theAction] = 'Action';
   language[Words.action] = 'Action';
   language[Words.dayExport] = 'Export all';
   language[Words.companyExport] = 'Export company for days';
@@ -110,6 +115,11 @@ void english(){
   language[Words.noPath] = 'No storage path found';
   language[Words.noData] = 'No data to export';
 
+  language[Words.money] = '£';
+
+  language[Words.pricePer] = 'Price per hour';
+  language[Words.priceTotal] = 'Total price';
+
   language[Words.tableTop] = """
 <tr>
 <td>Company</td>
@@ -120,17 +130,23 @@ void english(){
 </tr>
 """;
 }
+void englishUS(){
+  englishBR();
+  language[Words.money] = '\$';
+}
 
 void pickLang(String lang){
   if (lang == 'en'){
-    english();
+    englishBR();
+  } else if (lang == 'us'){
+    englishUS();
   } else if (lang == 'nl'){
     dutch();
   }
 }
 
 Map<String, String> languageMap(){
-  return {'🇬🇧 English-UK': 'en', '🇳🇱 Nederlands': 'nl'};
+  return {'🇬🇧 English-UK': 'en', '🇳🇱 Nederlands': 'nl', '🇺🇸 English-US': 'us'};
 }
 
-enum Words { startDate, endDate, day, hour, timeTotal, company, action, fr, workTime, noData, noPath, save, selectedDay, inputText, forgotSelect, problem, dayPickEnd,dayPickStart, dayArrow, cancel, ok, submit, stopTime, startTime, stop, start, actionInput, companyInput, askPath, exportLocation, defaultHTML, editDay, afterwards, companyExport, dayExport, actions, companies, tableTop}
+enum Words { priceTotal, pricePer, money, startDate, endDate, day, hour, timeTotal, company, action, fr, workTime, noData, noPath, save, selectedDay, inputText, forgotSelect, problem, dayPickEnd,dayPickStart, dayArrow, cancel, ok, submit, stopTime, startTime, stop, start, actionInput, companyInput, askPath, exportLocation, defaultHTML, editDay, afterwards, companyExport, dayExport, theAction, companies, tableTop}
