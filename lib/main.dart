@@ -19,6 +19,7 @@ Future<void> main() async {
     title: 'Irene Uren',
     backgroundColor: Colors.grey,
     minimumSize: s,//TODO
+    maximumSize: Size(700, 600),
     skipTaskbar: false,
   );
   windowManager.waitUntilReadyToShow(windowOptions, () async {

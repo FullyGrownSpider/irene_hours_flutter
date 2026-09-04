@@ -16,6 +16,7 @@ class AddRemoveBox<T> {
       void Function(String) removeCompany, void Function(String?) setSelected,
       this.getSelected, void Function(String) createDialoge){
     dropdown = _createDropdown(getAll, hint, setSelected, getSelected);
+    dropdown.items?.sort((a,b) => a.value!.compareTo(b.value!));
     removeButton = _createRemoveButton(removeCompany, () => getSelected().toString(), setSelected);
     addButton = _createAddButton(createDialoge);
   }
@@ -40,6 +41,7 @@ class AddRemoveBox<T> {
       var value = getSelected();
       if (value.isEmpty) return;
       removeCompany(value);
+      _removeItemFromBox(value);
       setSelected(null);
       change.value = !change.value;
     }, icon: Icon(Icons.remove));
@@ -71,5 +73,12 @@ class AddRemoveBox<T> {
           setSelected(s);
           change.value = !change.value;
         });
+  }
+  void addItemToBox(String text){
+    dropdown.items?.add(DropdownMenuItem<String>(value: text, child: Text(text)));
+    dropdown.items?.sort((a,b) => a.value!.compareTo(b.value!));
+  }
+  void _removeItemFromBox(String text){
+    dropdown.items?.removeWhere((x) => x.value == text);
   }
 }

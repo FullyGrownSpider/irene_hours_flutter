@@ -53,7 +53,7 @@ class _BaseScreenState extends State<BaseScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey,
-      body: SingleChildScrollView(
+      body: Center(child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: SingleChildScrollView(
           child: Column(
@@ -180,7 +180,7 @@ class _BaseScreenState extends State<BaseScreen> {
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 
@@ -202,9 +202,16 @@ class _BaseScreenState extends State<BaseScreen> {
         });
       },
       (s) {
-        var company = data.firstWhere((e) => e.companyName == s, orElse: () => Company(''));
-        if (company.companyName.isNotEmpty){
+        if (s != null) {
+          var company = data.firstWhere((e) => e.companyName == s,
+              orElse: () {
+                var c = Company(s);
+                  data.add(c);
+                  return c;
+              });
           selectedCompany = company;
+        } else {
+          selectedCompany = null;
         }
         setState(() {});},
       () => selectedCompany,
@@ -212,7 +219,9 @@ class _BaseScreenState extends State<BaseScreen> {
         displayTextInputDialog(context, s, language[Words.companyInput]!).then((e) {
           if (e == null || e.isEmpty) return;
           setState(() {
-            widget.l.storeCompany(Company(e));
+            companyBox?.addItemToBox(e);
+            var newCompany = Company(e);
+            widget.l.storeCompany(newCompany);
           });
         });
       },
@@ -233,6 +242,7 @@ class _BaseScreenState extends State<BaseScreen> {
         displayTextInputDialog(context, s, language[Words.actionInput]!).then((e) {
           if (e == null || e.isEmpty) return;
           setState(() {
+            actionBox?.addItemToBox(e);
             widget.l.storeAction(e);
           });
         });
