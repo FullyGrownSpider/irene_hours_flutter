@@ -20,9 +20,13 @@ Map<String, String> lineConversion(String line) {
 
 RegAct regactImportGenerator(String line, DateTime date, List<Company> companies) {
   var list = lineConversion(line);
+  var company = companies.firstWhere((e) => e.companyName == dataImportGenerator<String>(list[_basicValuesToString(_BasicValues.v2)]), orElse: () => Company(""));
+  if (company.companyName.isEmpty) {
+    company = Company(dataImportGenerator<String>(list[_basicValuesToString(_BasicValues.v2)]));
+  }
   return RegAct(
     dataImportGenerator<DateTime>(list[_basicValuesToString(_BasicValues.v1)]),
-    companies.firstWhere((e) => e.companyName == dataImportGenerator<String>(list[_basicValuesToString(_BasicValues.v2)])),
+    company,
     dataImportGenerator<String>(list[_basicValuesToString(_BasicValues.v3)]),
     dataImportGenerator<DateTime>(list[_basicValuesToString(_BasicValues.v4)]),
     date,

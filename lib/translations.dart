@@ -28,7 +28,8 @@ void dutch(){
   language[Words.endDate] = 'tot';
 
   language[Words.submit] = 'Voeg toe';
-  language[Words.ok] = 'Klaar';
+  language[Words.ok] = 'Oké';
+  language[Words.done] = 'Oké';
   language[Words.cancel] = 'Cancel';
   language[Words.dayArrow] = 'Dag ⇨ ';
   language[Words.day] = 'Dag';
@@ -54,6 +55,9 @@ void dutch(){
 
   language[Words.pricePer] = 'Prijs per uur ';
   language[Words.priceTotal] = 'Totale prijs ';
+
+  language[Words.wantToExport] = 'Weet je zeker dat je wil her-exporten?';
+  language[Words.wantToExportExplain] = 'Als het HTML file opnieuw ge-export wordt kan de oude HTML verloren gaan';
 
   language[Words.tableTop] = """
 <tr>
@@ -94,7 +98,8 @@ void englishBR(){
   language[Words.endDate] = 'to';
 
   language[Words.submit] = 'Add';
-  language[Words.ok] = 'Done';
+  language[Words.done] = 'Done';
+  language[Words.ok] = 'Oké';
   language[Words.cancel] = 'Cancel';
   language[Words.dayArrow] = 'Day ⇨ ';
   language[Words.day] = 'Day';
@@ -119,6 +124,9 @@ void englishBR(){
 
   language[Words.pricePer] = 'Price per hour';
   language[Words.priceTotal] = 'Total price';
+
+  language[Words.wantToExport] = 'Are you sure you want to re-export?';
+  language[Words.wantToExportExplain] = 'If you export it, the HTML you are using might be lost';
 
   language[Words.tableTop] = """
 <tr>
@@ -149,4 +157,4 @@ Map<String, String> languageMap(){
   return {'🇬🇧 English-UK': 'en', '🇳🇱 Nederlands': 'nl', '🇺🇸 English-US': 'us'};
 }
 
-enum Words { priceTotal, pricePer, money, startDate, endDate, day, hour, timeTotal, company, action, fr, workTime, noData, noPath, save, selectedDay, inputText, forgotSelect, problem, dayPickEnd,dayPickStart, dayArrow, cancel, ok, submit, stopTime, startTime, stop, start, actionInput, companyInput, askPath, exportLocation, defaultHTML, editDay, afterwards, companyExport, dayExport, theAction, companies, tableTop}
+enum Words { priceTotal, pricePer, money, startDate, endDate, day, hour, timeTotal, company, action, fr, workTime, noData, noPath, save, selectedDay, inputText, forgotSelect, problem, dayPickEnd,dayPickStart, dayArrow, cancel, ok, submit, stopTime, startTime, stop, start, actionInput, companyInput, askPath, exportLocation, defaultHTML, editDay, afterwards, companyExport, dayExport, theAction, companies, tableTop, wantToExportExplain, wantToExport, done}

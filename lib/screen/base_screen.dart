@@ -53,134 +53,158 @@ class _BaseScreenState extends State<BaseScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey,
-      body: Center(child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
+      body: Center(
         child: SingleChildScrollView(
-          child: Column(
-            children: [
-              FutureBuilder(
-                future: companyBox != null ? null : widget.l.getAllCompanies(),
-                builder: (a, b) {
-                  if (companyBox != null) return companyBox!.getMyWidget();
-                  if (!b.hasData) return const Text('');
-                  b.data!.sort((a, b) => a.compareTo(b));
-                  companyBox = createCompanyBox(context, b.data!);
-                  return companyBox!.getMyWidget();
-                },
-              ),
-              FutureBuilder(
-                future: actionBox != null ? null : widget.l.getAllActions(),
-                builder: (a, b) {
-                  if (actionBox != null) return actionBox!.getMyWidget();
-                  if (!b.hasData) return const Text('');
-                  b.data!.sort((a, b) => a.compareTo(b));
-                  actionBox = createActionBox(context, b.data!);
-                  return actionBox!.getMyWidget();
-                },
-              ),
-              startButton.getMyWidget(),
-              arthurText(' '),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  arthurButton(
-                    onPressed: () {
-                      if (selectedCompany == null || selectedAction == null) {
-                        _showMyDialog(language[Words.forgotSelect]!);
-                        return;
-                      }
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute<void>(
-                          builder: (context) =>
-                              AddAfterScreen(selectedCompany!, selectedAction!),
-                        ),
-                      );
-                    },
+          scrollDirection: Axis.horizontal,
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                FutureBuilder(
+                  future: companyBox != null
+                      ? null
+                      : widget.l.getAllCompanies(),
+                  builder: (a, b) {
+                    if (companyBox != null) return companyBox!.getMyWidget();
+                    if (!b.hasData) return const Text('');
+                    b.data!.sort((a, b) => a.compareTo(b));
+                    companyBox = createCompanyBox(context, b.data!);
+                    return companyBox!.getMyWidget();
+                  },
+                ),
+                FutureBuilder(
+                  future: actionBox != null ? null : widget.l.getAllActions(),
+                  builder: (a, b) {
+                    if (actionBox != null) return actionBox!.getMyWidget();
+                    if (!b.hasData) return const Text('');
+                    b.data!.sort((a, b) => a.compareTo(b));
+                    actionBox = createActionBox(context, b.data!);
+                    return actionBox!.getMyWidget();
+                  },
+                ),
+                startButton.getMyWidget(),
+                arthurText(' '),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    arthurButton(
+                      onPressed: () {
+                        if (selectedCompany == null || selectedAction == null) {
+                          _showMyDialog(language[Words.forgotSelect]!);
+                          return;
+                        }
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute<void>(
+                            builder: (context) => AddAfterScreen(
+                              selectedCompany!,
+                              selectedAction!,
+                            ),
+                          ),
+                        );
+                      },
 
-                    child: arthurText(language[Words.afterwards]!),
-                  ),
-                  arthurButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DayEditScreen(),
+                      child: arthurText(language[Words.afterwards]!),
+                    ),
+                    arthurButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DayEditScreen(),
+                          ),
+                        );
+                      },
+                      child: arthurText(language[Words.editDay]!),
+                    ),
+                  ],
+                ),
+                arthurText(' '),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    daysStart.getMyWidget(context),
+                    arthurText('  ⎻⎻⎻⎻⎻  '),
+                    daysEnd.getMyWidget(context),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    arthurButton(
+                      onPressed: () {
+                        widget.l.createExport(
+                          daysStart.getDate(),
+                          daysEnd.getDate(),
+                          null,
+                          _showMyDialog,
+                        );
+                      },
+                      child: arthurText(language[Words.dayExport]!),
+                    ),
+                    arthurButton(
+                      onPressed: () {
+                        if (companyBox!.getSelected() == null) {
+                          _showMyDialog(language[Words.forgotSelect]!);
+                          return;
+                        }
+                        widget.l.createExport(
+                          daysStart.getDate(),
+                          daysEnd.getDate(),
+                          companyBox!.getSelected(),
+                          _showMyDialog,
+                        );
+                      },
+                      child: arthurText(language[Words.companyExport]!),
+                    ),
+                  ],
+                ),
+                arthurText('   '),
+                arthurButton(
+                  child: arthurText(language[Words.defaultHTML]!),
+                  onPressed: () => showDialog<String>(
+                    context: context,
+                    builder: (BuildContext context) => AlertDialog(
+                      title: Text(language[Words.wantToExport]!),
+                      content: Text(language[Words.wantToExportExplain]!),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text(language[Words.cancel]!),
                         ),
-                      );
-                    },
-                    child: arthurText(language[Words.editDay]!),
+                        TextButton(
+                          onPressed: () {
+                            widget.l.exportHTML();
+                            Navigator.pop(context);
+                          },
+                          child: Text(language[Words.ok]!),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
-              arthurText(' '),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  daysStart.getMyWidget(context),
-                  arthurText('  ⎻⎻⎻⎻⎻  '),
-                  daysEnd.getMyWidget(context),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  arthurButton(
-                    onPressed: () {
-                      widget.l.createExport(
-                        daysStart.getDate(),
-                        daysEnd.getDate(),
-                        null,
-                        _showMyDialog,
-                      );
-                    },
-                    child: arthurText(language[Words.dayExport]!),
-                  ),
-                  arthurButton(
-                    onPressed: () {
-                      if (companyBox!.getSelected() == null) {
-                        _showMyDialog(language[Words.forgotSelect]!);
-                        return;
-                      }
-                      widget.l.createExport(
-                        daysStart.getDate(),
-                        daysEnd.getDate(),
-                        companyBox!.getSelected(),
-                        _showMyDialog,
-                      );
-                    },
-                    child: arthurText(language[Words.companyExport]!),
-                  ),
-                ],
-              ),
-              arthurText('   '),
-              arthurButton(
-                onPressed: () {
-                  widget.l.exportHTML();
-                },
-                child: arthurText(language[Words.defaultHTML]!),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  arthurButton(
-                    onPressed: () {
-                      setStorageLocation(context);
-                    },
-                    child: arthurText(language[Words.exportLocation]!),
-                  ),
-                  FutureBuilder(
-                    future: widget.l.getPath(),
-                    builder: (newContext, text) =>
-                        arthurText(text.hasData ? shorten(text.data!, 40) : ''),
-                  ),
-                ],
-              ),
-              langPicker.getMyWidget()
-            ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    arthurButton(
+                      onPressed: () {
+                        setStorageLocation(context).then((x) => setState((){}));
+                      },
+                      child: arthurText(language[Words.exportLocation]!),
+                    ),
+                    FutureBuilder(
+                      future: widget.l.getPath(),
+                      builder: (newContext, text) => arthurText(
+                        text.hasData ? shorten(text.data!, 40) : '',
+                      ),
+                    ),
+                  ],
+                ),
+                langPicker.getMyWidget(),
+              ],
+            ),
           ),
         ),
-      )),
+      ),
     );
   }
 
@@ -189,10 +213,16 @@ class _BaseScreenState extends State<BaseScreen> {
     super.initState();
     daysEnd = DatePicker(language[Words.dayPickEnd]!);
     daysStart = DatePicker(language[Words.dayPickStart]!);
-    langPicker = LangPicker((newLang) => setState(() {}), Loading().getLangSync);
+    langPicker = LangPicker(
+      (newLang) => setState(() {}),
+      Loading().getLangSync,
+    );
   }
 
-  AddRemoveCompanyBox createCompanyBox(BuildContext context, List<Company> data) {
+  AddRemoveCompanyBox createCompanyBox(
+    BuildContext context,
+    List<Company> data,
+  ) {
     return AddRemoveCompanyBox(
       language[Words.companies]!,
       data.map((e) => e.companyName).toList(),
@@ -203,20 +233,25 @@ class _BaseScreenState extends State<BaseScreen> {
       },
       (s) {
         if (s != null) {
-          var company = data.firstWhere((e) => e.companyName == s,
-              orElse: () {
-                var c = Company(s);
-                  data.add(c);
-                  return c;
-              });
+          var company = data.firstWhere(
+            (e) => e.companyName == s,
+            orElse: () {
+              var c = Company(s);
+              data.add(c);
+              return c;
+            },
+          );
           selectedCompany = company;
         } else {
           selectedCompany = null;
         }
-        setState(() {});},
+        setState(() {});
+      },
       () => selectedCompany,
       (s) {
-        displayTextInputDialog(context, s, language[Words.companyInput]!).then((e) {
+        displayTextInputDialog(context, s, language[Words.companyInput]!).then((
+          e,
+        ) {
           if (e == null || e.isEmpty) return;
           setState(() {
             companyBox?.addItemToBox(e);
@@ -225,7 +260,7 @@ class _BaseScreenState extends State<BaseScreen> {
           });
         });
       },
-      widget.l.storeCompany
+      widget.l.storeCompany,
     );
   }
 
@@ -239,7 +274,9 @@ class _BaseScreenState extends State<BaseScreen> {
       (s) => selectedAction = s,
       () => selectedAction,
       (s) {
-        displayTextInputDialog(context, s, language[Words.actionInput]!).then((e) {
+        displayTextInputDialog(context, s, language[Words.actionInput]!).then((
+          e,
+        ) {
           if (e == null || e.isEmpty) return;
           setState(() {
             actionBox?.addItemToBox(e);
@@ -262,7 +299,7 @@ class _BaseScreenState extends State<BaseScreen> {
           ),
           actions: <Widget>[
             arthurButton(
-              child: arthurText('Ok'),
+              child: arthurText(language[Words.ok]!),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -273,8 +310,8 @@ class _BaseScreenState extends State<BaseScreen> {
     );
   }
 
-  void setStorageLocation(BuildContext context) {
-    displayTextInputDialog(context, '', language[Words.askPath]!).then((e) {
+  Future<Null> setStorageLocation(BuildContext context) {
+    return displayTextInputDialog(context, '', language[Words.askPath]!).then((e) {
       if (e == null) return;
       widget.l.setPath(e);
     });
